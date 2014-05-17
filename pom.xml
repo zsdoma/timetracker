@@ -26,6 +26,7 @@
 	<modules>
 		<module>timetracker-api</module>
 		<module>timetracker-core</module>
+		<module>timetracker-build-tools</module>
 	</modules>
 
 	<build>
