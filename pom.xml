@@ -55,11 +55,11 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>2.12</version>
 				<dependencies>
-					<dependency>
-						<groupId>hu.unideb.inf.maven</groupId>
-						<artifactId>build-tools</artifactId>
-						<version>1.0</version>
-					</dependency>
+				<dependency>
+					<groupId>hu.zsdoma</groupId>
+					<artifactId>timetracker-build-tools</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
 				</dependencies>
 			</plugin>
 		</plugins>
