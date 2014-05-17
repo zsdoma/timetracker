@@ -15,7 +15,7 @@
 			<url>http://www.gnu.org/copyleft/gpl.html</url>
 		</license>
 	</licenses>
-	
+
 	<inceptionYear>2014</inceptionYear>
 
 	<properties>
@@ -28,6 +28,15 @@
 		<module>timetracker-core</module>
 		<module>timetracker-build-tools</module>
 	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -55,11 +64,11 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>2.12</version>
 				<dependencies>
-				<dependency>
-					<groupId>hu.zsdoma</groupId>
-					<artifactId>timetracker-build-tools</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
-				</dependency>
+					<dependency>
+						<groupId>hu.zsdoma</groupId>
+						<artifactId>timetracker-build-tools</artifactId>
+						<version>0.0.1-SNAPSHOT</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 		</plugins>
