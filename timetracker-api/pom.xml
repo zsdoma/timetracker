@@ -9,4 +9,32 @@
   <artifactId>timetracker-api</artifactId>
   <name>TimeTracker API</name>
   <description>TimeTracker API</description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jaxb2-maven-plugin</artifactId>
+        <version>1.3</version>
+        <executions>
+          <execution>
+            <id>1</id>
+            <goals>
+              <goal>xjc</goal>
+            </goals>
+            <configuration>
+              <packageName>hu.zsdoma.timetracker.schemas</packageName>
+              <schemaDirectory>${basedir}/src/main/resources/static/SCHEMAS</schemaDirectory>
+              <schemaFiles>worklog.xsd</schemaFiles>
+              <outputDirectory>target/generated-sources/xjc</outputDirectory>
+              <staleFile>target/generated-sources/.eSzavazas-110-electioneventFlag</staleFile>
+              <clearOutputDir>false</clearOutputDir>
+<!--               <bindingFiles>../resources/jaxb-binding.xml</bindingFiles> -->
+              <catalog></catalog>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
