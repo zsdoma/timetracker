@@ -3,7 +3,7 @@ package hu.zsdoma.timetracker;
 import hu.zsdoma.timetracker.api.DataSource;
 import hu.zsdoma.timetracker.api.TimeTracker;
 import hu.zsdoma.timetracker.api.dto.Database;
-import hu.zsdoma.timetracker.api.dto.Worklog;
+import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.api.exception.TimeTrackerException;
 
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ import java.util.Objects;
 public class DefaultTimeTracker implements TimeTracker {
 
     private DataSource dataSource;
-    private Map<Long, Worklog> worklogs;
-    private Worklog currentWorklog;
+    private Map<Long, WorklogEntry> worklogs;
+    private WorklogEntry currentWorklog;
 
     public DefaultTimeTracker() {
         super();
@@ -36,9 +36,9 @@ public class DefaultTimeTracker implements TimeTracker {
     }
 
     @Override
-    public List<Worklog> list() {
-        List<Worklog> worklogs = new ArrayList<Worklog>();
-        for (Worklog worklog : this.worklogs.values()) {
+    public List<WorklogEntry> list() {
+        List<WorklogEntry> worklogs = new ArrayList<WorklogEntry>();
+        for (WorklogEntry worklog : this.worklogs.values()) {
             worklogs.add(worklog);
         }
         Collections.sort(worklogs);
@@ -46,18 +46,18 @@ public class DefaultTimeTracker implements TimeTracker {
     }
 
     @Override
-    public List<Worklog> listByDay(final long timestamp) {
+    public List<WorklogEntry> listByDay(final long timestamp) {
         throw new UnsupportedOperationException("Not implemented, yet.");
     }
 
     @Override
-    public void addEarlier(final Worklog worklog) {
+    public void addEarlier(final WorklogEntry worklog) {
         check(worklog);
         this.worklogs.put(worklog.getId(), worklog);
     }
 
-    private void check(Worklog worklog) {
-        Objects.requireNonNull(worklog, "Worklog is null!");
+    private void check(WorklogEntry worklog) {
+        Objects.requireNonNull(worklog, "WorklogEntry is null!");
 
         long now = new Date().getTime();
         long beginTimestamp = worklog.getBeginTimestamp();
@@ -74,7 +74,7 @@ public class DefaultTimeTracker implements TimeTracker {
 
     @Override
     public boolean overlapCheck(long beginTimestamp, long endTimeStamp) {
-        for (Worklog worklog : this.worklogs.values()) {
+        for (WorklogEntry worklog : this.worklogs.values()) {
             long begin = worklog.getBeginTimestamp();
             long end = worklog.getEndTimeStamp();
             if (begin < endTimeStamp && beginTimestamp < end) {
@@ -90,25 +90,25 @@ public class DefaultTimeTracker implements TimeTracker {
     }
 
     @Override
-    public void update(final Worklog worklog) {
+    public void update(final WorklogEntry worklog) {
         this.worklogs.remove(worklog.getId());
         check(worklog);
         this.worklogs.put(worklog.getId(), worklog);
     }
 
     @Override
-    public void start(Worklog worklog) {
+    public void start(WorklogEntry worklog) {
         check(worklog);
         throw new UnsupportedOperationException("Not implemented, yet.");
     }
 
     @Override
-    public void end(Worklog worklog) {
+    public void end(WorklogEntry worklog) {
         throw new UnsupportedOperationException("Not implemented, yet.");
     }
 
     @Override
-    public Worklog findById(long id) {
+    public WorklogEntry findById(long id) {
         return this.worklogs.get(id);
     }
 

@@ -5,25 +5,25 @@ import java.util.Date;
 /**
  * DTO class for worklog entry.
  */
-public class Worklog implements Comparable<Worklog> {
+public class WorklogEntry implements Comparable<WorklogEntry> {
 
     /**
-     * Worklog ID.
+     * WorklogEntry ID.
      */
     private long id;
 
     /**
-     * Worklog begin timestamp.
+     * WorklogEntry begin timestamp.
      */
     private long beginTimestamp;
 
     /**
-     * Worklog end timestamp.
+     * WorklogEntry end timestamp.
      */
     private long endTimeStamp;
 
     /**
-     * Worklog message.
+     * WorklogEntry message.
      */
     private String message;
 
@@ -36,7 +36,7 @@ public class Worklog implements Comparable<Worklog> {
      * @param issueId
      */
     // TODO builder patter
-    public Worklog(final Date begin, final Date end, final String message) {
+    public WorklogEntry(final Date begin, final Date end, final String message) {
         super();
         this.beginTimestamp = begin.getTime();
         this.endTimeStamp = end.getTime();
@@ -111,7 +111,7 @@ public class Worklog implements Comparable<Worklog> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Worklog other = (Worklog) obj;
+        WorklogEntry other = (WorklogEntry) obj;
         if (beginTimestamp != other.beginTimestamp)
             return false;
         if (endTimeStamp != other.endTimeStamp)
@@ -128,12 +128,12 @@ public class Worklog implements Comparable<Worklog> {
 
     @Override
     public String toString() {
-        return "Worklog [id=" + id + ", beginTimestamp=" + beginTimestamp + ", endTimeStamp=" + endTimeStamp
+        return "WorklogEntry [id=" + id + ", beginTimestamp=" + beginTimestamp + ", endTimeStamp=" + endTimeStamp
                 + ", message=" + message + "]";
     }
 
     @Override
-    public int compareTo(Worklog o) {
+    public int compareTo(WorklogEntry o) {
         if (this.id < o.getId()) {
             return -1;
         } else if (this.id > o.getId()) {

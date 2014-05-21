@@ -5,11 +5,20 @@
     
     <complexType name="Worklog">
       <sequence>
-        <element name="id" type="int" maxOccurs="1" minOccurs="1"></element>
+        <element name="id" type="long" maxOccurs="1" minOccurs="1"></element>
         <element name="message" type="string" maxOccurs="1" minOccurs="1"></element>
-        <element name="beginTime" type="dateTime" maxOccurs="1" minOccurs="1"></element>
-        <element name="endTime" type="dateTime" maxOccurs="1" minOccurs="1"></element>
+        <element name="beginTime" type="long" maxOccurs="1" minOccurs="1"></element>
+        <element name="endTime" type="long" maxOccurs="1" minOccurs="1"></element>
       </sequence>
     </complexType>
 
+
+
+    <element name="worklogs" type="tns:TimeTracker"></element>
+    
+    <complexType name="TimeTracker">
+      <sequence>
+        <element name="worklogs" type="tns:Worklog" maxOccurs="unbounded" minOccurs="0"></element>
+      </sequence>
+    </complexType>
 </schema>

@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Database {
 
-    private Map<Long, Worklog> worklogs;
+    private Map<Long, WorklogEntry> worklogs;
     private List<Long> timestampIndex;
     private List<Boolean> worklogTypes;
 
@@ -15,16 +15,16 @@ public class Database {
         this.worklogs = new HashMap<>();
     }
 
-    public Database(Map<Long, Worklog> worklogs) {
+    public Database(Map<Long, WorklogEntry> worklogs) {
         super();
         this.worklogs = worklogs;
     }
 
-    public Map<Long, Worklog> getWorklogs() {
+    public Map<Long, WorklogEntry> getWorklogs() {
         return worklogs;
     }
 
-    public void setWorklogs(Map<Long, Worklog> worklogs) {
+    public void setWorklogs(Map<Long, WorklogEntry> worklogs) {
         this.worklogs = worklogs;
     }
 

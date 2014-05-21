@@ -1,6 +1,6 @@
 package hu.zsdoma.timetracker.api;
 
-import hu.zsdoma.timetracker.api.dto.Worklog;
+import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 
 import java.util.List;
 
@@ -14,24 +14,24 @@ public interface TimeTracker {
      * 
      * @return List of all stored worklogs.
      */
-    List<Worklog> list();
+    List<WorklogEntry> list();
 
     /**
      * List worklogs by given day in timestamp.
      * 
      * @param timestamp
      *            Timestamp // FIXME javadoc
-     * @return {@link Worklog} reference list.
+     * @return {@link WorklogEntry} reference list.
      */
-    List<Worklog> listByDay(long timestamp);
+    List<WorklogEntry> listByDay(long timestamp);
 
-    Worklog findById(long id);
+    WorklogEntry findById(long id);
 
-    void start(Worklog worklogDTO);
+    void start(WorklogEntry worklogDTO);
 
-    void end(Worklog worklogDTO);
+    void end(WorklogEntry worklogDTO);
 
-    void addEarlier(Worklog worklogDTO);
+    void addEarlier(WorklogEntry worklogDTO);
 
     /**
      * Remove worklog by given worklogId.
@@ -45,9 +45,9 @@ public interface TimeTracker {
      * Update the given worklog.
      * 
      * @param worklogDTO
-     *            {@link Worklog} reference.
+     *            {@link WorklogEntry} reference.
      */
-    void update(Worklog worklogDTO);
+    void update(WorklogEntry worklogDTO);
 
     boolean overlapCheck(long beginTimestamp, long endTimeStamp);
 }
