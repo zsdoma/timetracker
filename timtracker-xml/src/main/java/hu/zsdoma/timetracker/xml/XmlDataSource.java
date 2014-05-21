@@ -1,53 +1,60 @@
 package hu.zsdoma.timetracker.xml;
 
 import hu.zsdoma.timetracker.api.DataSource;
-import hu.zsdoma.timetracker.api.dto.Database;
+import hu.zsdoma.timetracker.api.dto.TimeTrackerEntry;
 import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.api.exception.TimeTrackerException;
 import hu.zsdoma.timetracker.schemas.ObjectFactory;
 import hu.zsdoma.timetracker.schemas.TimeTracker;
 import hu.zsdoma.timetracker.schemas.Worklog;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.w3c.dom.Node;
-
 public class XmlDataSource implements DataSource {
 
-    private OutputStream outputStream;
-    private InputStream inputStream;
+    private File file;
 
-    public XmlDataSource(OutputStream outputStream) {
+    public XmlDataSource(File file) {
         super();
-        this.outputStream = outputStream;
+        this.file = file;
     }
 
     @Override
-    public void save(Database database) {
+    public void save(TimeTrackerEntry database) {
         TimeTracker timeTracker = buildTimeTracker(database);
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(TimeTracker.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
 
-            marshaller.marshal(timeTracker, outputStream);
+            marshaller.marshal(timeTracker, openStream());
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private TimeTracker buildTimeTracker(Database database) {
+    private FileOutputStream openStream() {
+        FileOutputStream fileOutputStream;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return fileOutputStream;
+    }
+
+    private TimeTracker buildTimeTracker(TimeTrackerEntry database) {
         Map<Long, WorklogEntry> worklogEntries = database.getWorklogs();
         ObjectFactory objectFactory = new ObjectFactory();
         TimeTracker timeTracker = objectFactory.createTimeTracker();
@@ -64,7 +71,7 @@ public class XmlDataSource implements DataSource {
     }
 
     @Override
-    public Database load() {
+    public TimeTrackerEntry load() {
         TimeTracker timeTracker = null;
         try {
             timeTracker = loadTimeTracker();
@@ -72,6 +79,13 @@ public class XmlDataSource implements DataSource {
             throw new RuntimeException(e);
         }
 
+        Map<Long, WorklogEntry> worklogEntries = parseTimeTrackerElement(timeTracker);
+
+        TimeTrackerEntry database = new TimeTrackerEntry(worklogEntries);
+        return database;
+    }
+
+    private Map<Long, WorklogEntry> parseTimeTrackerElement(TimeTracker timeTracker) {
         List<Worklog> worklogs = timeTracker.getWorklogs();
 
         Map<Long, WorklogEntry> worklogEntries = new HashMap<Long, WorklogEntry>();
@@ -82,21 +96,28 @@ public class XmlDataSource implements DataSource {
             WorklogEntry worklogEntry = new WorklogEntry(new Date(begin), new Date(end), message);
             worklogEntries.put(worklog.getId(), worklogEntry);
         }
-
-        Database database = new Database(worklogEntries);
-
-        return database;
+        return worklogEntries;
     }
 
     private TimeTracker loadTimeTracker() throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(TimeTracker.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        Object object = unmarshaller.unmarshal(inputStream);
+        Object object = unmarshaller.unmarshal(openInputStream());
         if (object instanceof TimeTracker) {
             return (TimeTracker) object;
         } else {
             throw new TimeTrackerException("Can't find TimeTracker element in xml.");
         }
+    }
+
+    private FileInputStream openInputStream() {
+        FileInputStream fileInputStream;
+        try {
+            fileInputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return fileInputStream;
     }
 
 }

@@ -2,7 +2,7 @@ package hu.zsdoma.timetracker;
 
 import hu.zsdoma.timetracker.api.DataSource;
 import hu.zsdoma.timetracker.api.TimeTracker;
-import hu.zsdoma.timetracker.api.dto.Database;
+import hu.zsdoma.timetracker.api.dto.TimeTrackerEntry;
 import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.api.exception.TimeTrackerException;
 
@@ -31,7 +31,7 @@ public class DefaultTimeTracker implements TimeTracker {
     public DefaultTimeTracker(DataSource dataSource) {
         super();
         this.dataSource = dataSource;
-        Database database = this.dataSource.load();
+        TimeTrackerEntry database = this.dataSource.load();
         this.worklogs = database.getWorklogs();
     }
 

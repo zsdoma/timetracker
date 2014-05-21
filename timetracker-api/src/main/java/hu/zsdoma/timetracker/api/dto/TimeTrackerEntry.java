@@ -1,21 +1,18 @@
 package hu.zsdoma.timetracker.api.dto;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class Database {
+public class TimeTrackerEntry {
 
     private Map<Long, WorklogEntry> worklogs;
-    private List<Long> timestampIndex;
-    private List<Boolean> worklogTypes;
 
-    public Database() {
+    public TimeTrackerEntry() {
         super();
         this.worklogs = new HashMap<>();
     }
 
-    public Database(Map<Long, WorklogEntry> worklogs) {
+    public TimeTrackerEntry(Map<Long, WorklogEntry> worklogs) {
         super();
         this.worklogs = worklogs;
     }
