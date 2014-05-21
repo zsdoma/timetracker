@@ -27,6 +27,7 @@
     <module>timetracker-api</module>
     <module>timetracker-core</module>
     <module>timetracker-build-tools</module>
+    <module>timtracker-xml</module>
   </modules>
 
   <dependencies>
@@ -45,8 +46,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
       <plugin>
@@ -70,6 +71,11 @@
             <version>0.0.1-SNAPSHOT</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.6</version>
       </plugin>
     </plugins>
   </build>
@@ -102,6 +108,15 @@
         <version>2.17</version>
         <configuration>
           <aggregate>false</aggregate>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <format>html</format>
+          <format>xml</format>
         </configuration>
       </plugin>
     </plugins>

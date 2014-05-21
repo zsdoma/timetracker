@@ -1,0 +1,1 @@
+package hu.zsdoma.timetracker.api.exception;

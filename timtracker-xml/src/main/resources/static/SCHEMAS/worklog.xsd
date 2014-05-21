@@ -9,15 +9,7 @@
         <element name="message" type="string" maxOccurs="1" minOccurs="1"></element>
         <element name="beginTime" type="dateTime" maxOccurs="1" minOccurs="1"></element>
         <element name="endTime" type="dateTime" maxOccurs="1" minOccurs="1"></element>
-        <element name="issue" type="tns:Issue" maxOccurs="1" minOccurs="1"></element>
       </sequence>
     </complexType>
 
-    <complexType name="Issue">
-      <sequence>
-        <element name="id" type="int"></element>
-        <element name="title" type="string"></element>
-        <element name="description" type="string"></element>
-      </sequence>
-    </complexType>
 </schema>
