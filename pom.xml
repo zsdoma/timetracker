@@ -28,6 +28,7 @@
     <module>timetracker-core</module>
     <module>timetracker-build-tools</module>
     <module>timetracker-xml</module>
+    <module>timetracker-cli</module>
   </modules>
 
   <dependencies>
