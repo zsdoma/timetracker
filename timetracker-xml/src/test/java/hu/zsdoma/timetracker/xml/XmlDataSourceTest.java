@@ -62,7 +62,6 @@ public class XmlDataSourceTest {
     }
 
     @Test
-    @Ignore
     public final void testSave() throws Exception {
         TimeTrackerEntry timeTrackerEntry = generateTestTimeTrackerEntry();
 

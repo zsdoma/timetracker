@@ -35,9 +35,9 @@ public class XmlDataSource implements DataSource {
     public void save(TimeTrackerEntry database) {
         TimeTracker timeTracker = buildTimeTracker(database);
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(TimeTracker.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName(),
+                    ObjectFactory.class.getClassLoader());
             Marshaller marshaller = jaxbContext.createMarshaller();
-
             marshaller.marshal(timeTracker, openStream());
         } catch (JAXBException e) {
             throw new RuntimeException(e);
