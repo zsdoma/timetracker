@@ -15,18 +15,18 @@ public class WorklogEntry implements Comparable<WorklogEntry> {
     /**
      * WorklogEntry begin timestamp.
      */
-    private long beginTimestamp;
+    private long beginTimestamp = -1;
 
     /**
      * WorklogEntry end timestamp.
      */
-    private long endTimeStamp;
+    private long endTimeStamp = -1;
 
     /**
      * WorklogEntry message.
      */
     private String message;
-
+    
     /**
      * Constructor for setting all member variable.
      * 
@@ -37,10 +37,15 @@ public class WorklogEntry implements Comparable<WorklogEntry> {
      */
     // TODO builder patter
     public WorklogEntry(final Date begin, final Date end, final String message) {
-        super();
-        this.beginTimestamp = begin.getTime();
+        this(begin, message);
         this.endTimeStamp = end.getTime();
-        this.id = this.beginTimestamp;
+    }
+
+    // TODO builder patter
+    public WorklogEntry(Date begin, String message) {
+        super();
+        this.id = begin.getTime();
+        this.beginTimestamp = begin.getTime();
         this.message = message;
     }
 
@@ -74,13 +79,17 @@ public class WorklogEntry implements Comparable<WorklogEntry> {
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
     public void setBegin(Date begin) {
         this.beginTimestamp = begin.getTime();
     }
-    
+
     public void setEnd(Date end) {
         this.endTimeStamp = end.getTime();
+    }
+    
+    public boolean isProgress() {
+        return endTimeStamp == -1;
     }
 
     /**
@@ -91,7 +100,7 @@ public class WorklogEntry implements Comparable<WorklogEntry> {
     public String getMessage() {
         return message;
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;

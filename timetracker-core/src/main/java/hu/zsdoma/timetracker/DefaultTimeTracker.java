@@ -5,8 +5,10 @@ import hu.zsdoma.timetracker.api.TimeTracker;
 import hu.zsdoma.timetracker.api.dto.TimeTrackerEntry;
 import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.api.exception.TimeTrackerException;
+import hu.zsdoma.timetracker.utils.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,14 +27,64 @@ public class DefaultTimeTracker implements TimeTracker {
 
     public DefaultTimeTracker() {
         super();
-        this.worklogs = new HashMap<>();
+        worklogs = new HashMap<>();
     }
 
-    public DefaultTimeTracker(DataSource dataSource) {
+    public DefaultTimeTracker(final DataSource dataSource) {
         super();
         this.dataSource = dataSource;
         TimeTrackerEntry database = this.dataSource.load();
-        this.worklogs = database.getWorklogs();
+        worklogs = database.getWorklogs();
+    }
+
+    @Override
+    public void addEarlier(final WorklogEntry worklog) {
+        check(worklog);
+        worklogs.put(worklog.getId(), worklog);
+    }
+
+    private void check(final WorklogEntry worklog) {
+        Objects.requireNonNull(worklog, "WorklogEntry is null!");
+
+        long now = new Date().getTime();
+        long beginTimestamp = worklog.getBeginTimestamp();
+        if (worklog.isProgress()) {
+            if (beginTimestamp > now) {
+                throw new TimeTrackerException("Invalid begin time. Must be earlier like current date.");
+            }
+        } else {
+            long endTimeStamp = worklog.getEndTimeStamp();
+            if ((endTimeStamp > now) || (beginTimestamp >= endTimeStamp)) {
+                throw new TimeTrackerException("Invalid begin or end time. Must be earlier like current date.");
+            }
+            if (overlapCheck(beginTimestamp, endTimeStamp)) {
+                throw new TimeTrackerException("Time overlap!");
+            }
+        }
+    }
+
+    @Override
+    public WorklogEntry current() {
+        return currentWorklog;
+    }
+
+    @Override
+    public void end(final Date now) {
+        Date endDate = DateUtils.normalizeDate(now);
+        currentWorklog.setEnd(endDate);
+        worklogs.put(currentWorklog.getId(), currentWorklog);
+        currentWorklog = null;
+    }
+
+    @Override
+    public void end(final Date now, final String message) {
+        currentWorklog.setMessage(message);
+        end(now);
+    }
+
+    @Override
+    public WorklogEntry findById(final long id) {
+        return worklogs.get(id);
     }
 
     @Override
@@ -51,33 +103,13 @@ public class DefaultTimeTracker implements TimeTracker {
     }
 
     @Override
-    public void addEarlier(final WorklogEntry worklog) {
-        check(worklog);
-        this.worklogs.put(worklog.getId(), worklog);
-    }
-
-    private void check(WorklogEntry worklog) {
-        Objects.requireNonNull(worklog, "WorklogEntry is null!");
-
-        long now = new Date().getTime();
-        long beginTimestamp = worklog.getBeginTimestamp();
-        long endTimeStamp = worklog.getEndTimeStamp();
-
-        if (endTimeStamp > now || beginTimestamp >= endTimeStamp) {
-            throw new TimeTrackerException("Invalid begin or end time. Must be earlier as current date.");
-        }
-
-        if (overlapCheck(beginTimestamp, endTimeStamp)) {
-            throw new TimeTrackerException("Time overlap!");
-        }
-    }
-
-    @Override
-    public boolean overlapCheck(long beginTimestamp, long endTimeStamp) {
-        for (WorklogEntry worklog : this.worklogs.values()) {
+    public boolean overlapCheck(final long beginTimestamp, final long endTimeStamp) {
+        long normalizedBegin = DateUtils.normalizeTimestamp(beginTimestamp);
+        long normalizedEnd = DateUtils.normalizeTimestamp(endTimeStamp);
+        for (WorklogEntry worklog : worklogs.values()) {
             long begin = worklog.getBeginTimestamp();
             long end = worklog.getEndTimeStamp();
-            if (begin < endTimeStamp && beginTimestamp < end) {
+            if ((begin < normalizedEnd) && (normalizedBegin < end)) {
                 return true;
             }
         }
@@ -86,30 +118,26 @@ public class DefaultTimeTracker implements TimeTracker {
 
     @Override
     public void removeById(final long worklogId) {
-        this.worklogs.remove(worklogId);
+        worklogs.remove(worklogId);
+    }
+
+    @Override
+    public void start(final String message) {
+        startFrom(new Date(), message);
+    }
+
+    @Override
+    public void startFrom(final Date now, final String message) {
+        WorklogEntry worklog = new WorklogEntry(DateUtils.normalizeDate(now), message);
+        check(worklog);
+        currentWorklog = worklog;
     }
 
     @Override
     public void update(final WorklogEntry worklog) {
-        this.worklogs.remove(worklog.getId());
+        worklogs.remove(worklog.getId());
         check(worklog);
-        this.worklogs.put(worklog.getId(), worklog);
-    }
-
-    @Override
-    public void start(WorklogEntry worklog) {
-        check(worklog);
-        throw new UnsupportedOperationException("Not implemented, yet.");
-    }
-
-    @Override
-    public void end(WorklogEntry worklog) {
-        throw new UnsupportedOperationException("Not implemented, yet.");
-    }
-
-    @Override
-    public WorklogEntry findById(long id) {
-        return this.worklogs.get(id);
+        worklogs.put(worklog.getId(), worklog);
     }
 
 }

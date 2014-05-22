@@ -2,6 +2,7 @@ package hu.zsdoma.timetracker.api;
 
 import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ public interface TimeTracker {
     List<WorklogEntry> list();
 
     /**
-     * List worklogs by given day in timestamp.
+     * List work logs by given day in timestamp.
      * 
      * @param timestamp
      *            Timestamp // FIXME javadoc
@@ -27,14 +28,20 @@ public interface TimeTracker {
 
     WorklogEntry findById(long id);
 
-    void start(WorklogEntry worklogDTO);
+    void startFrom(Date now, String message);
 
-    void end(WorklogEntry worklogDTO);
+    void start(String message);
+
+    void end(Date now, String message);
+
+    void end(Date now);
+
+    WorklogEntry current();
 
     void addEarlier(WorklogEntry worklogDTO);
 
     /**
-     * Remove worklog by given worklogId.
+     * Remove work log by given worklogId.
      * 
      * @param worklogId
      *            worklogId.
