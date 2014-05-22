@@ -12,11 +12,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -37,7 +39,9 @@ public class XmlDataSource implements DataSource {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName(),
                     ObjectFactory.class.getClassLoader());
+            // TODO fix formatted output
             Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             marshaller.marshal(timeTracker, openStream());
         } catch (JAXBException e) {
             throw new RuntimeException(e);
@@ -64,7 +68,7 @@ public class XmlDataSource implements DataSource {
             worklog.setId(worklogEntry.getId());
             worklog.setBeginTime(worklogEntry.getBeginTimestamp());
             worklog.setEndTime(worklogEntry.getEndTimeStamp());
-            worklog.setMessage(worklog.getMessage());
+            worklog.setMessage(worklogEntry.getMessage());
             timeTracker.getWorklogs().add(worklog);
         }
         return timeTracker;

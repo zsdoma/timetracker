@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<timeTracker xmlns="http://www.example.org/worklog">
+  <worklogs>
+    <id>1263264600000</id>
+    <message>worklog 2</message>
+    <beginTime>1263264600000</beginTime>
+    <endTime>1263265200000</endTime>
+  </worklogs>
+  <worklogs>
+    <id>1263263400000</id>
+    <message>worklog 1</message>
+    <beginTime>1263263400000</beginTime>
+    <endTime>1263264000000</endTime>
+  </worklogs>
+</timeTracker>
