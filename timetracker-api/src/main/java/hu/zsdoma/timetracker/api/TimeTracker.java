@@ -38,7 +38,7 @@ public interface TimeTracker {
 
     WorklogEntry current();
 
-    void addEarlier(WorklogEntry worklogDTO);
+    void addEarlier(WorklogEntry worklog);
 
     /**
      * Remove work log by given worklogId.
@@ -51,10 +51,10 @@ public interface TimeTracker {
     /**
      * Update the given worklog.
      * 
-     * @param worklogDTO
+     * @param worklog
      *            {@link WorklogEntry} reference.
      */
-    void update(WorklogEntry worklogDTO);
+    void update(WorklogEntry worklog);
 
     boolean overlapCheck(long beginTimestamp, long endTimeStamp);
 }
