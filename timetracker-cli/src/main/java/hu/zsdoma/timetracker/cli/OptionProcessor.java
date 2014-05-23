@@ -5,6 +5,7 @@ import hu.zsdoma.timetracker.utils.DateUtils;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Objects;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -33,7 +34,7 @@ public class OptionProcessor {
                 processStartCase();
             }
             if (commandLine.hasOption('e')) {
-                System.out.println("end worklog");
+                processEndCase();
             }
             if (commandLine.hasOption('l')) {
                 System.out.println("list worklogs");
@@ -50,6 +51,25 @@ public class OptionProcessor {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void processEndCase() throws ParseException {
+        if (commandLine.hasOption(OPTION_END_DATE)) {
+            Date endDate = processEndDate();
+            Objects.requireNonNull(endDate, "The endDate options required for end option.");
+            String message = processMessage();
+            if (message == null) {
+                timeTracker.end(endDate);
+            } else {
+                timeTracker.end(endDate, message);
+            }
+        } else {
+            System.out.println("The endDate options required for end option.");
+        }
+    }
+
+    private Date processEndDate() throws ParseException {
+        return parseDate(commandLine.getOptionValue(OPTION_END_DATE));
     }
 
     private void processStartCase() throws ParseException {
@@ -75,35 +95,35 @@ public class OptionProcessor {
         Date startTime = null;
         if (commandLine.hasOption(OPTION_START_DATE)) {
             String startTimeString = commandLine.getOptionValue(OPTION_START_DATE);
-            if (startTimeString != null) {
-                startTime = DateUtils.dateFormatInstance().parse(startTimeString);
-            }
+            startTime = parseDate(startTimeString);
+        }
+        return startTime;
+    }
+
+    private Date parseDate(String startTimeString) throws ParseException {
+        Date startTime = null;
+        if (startTimeString != null) {
+            startTime = DateUtils.dateFormatInstance().parse(startTimeString);
         }
         return startTime;
     }
 
     /*
-     * start: [startDate], [startTime], message 
-     * end: [startDate], [startTime], [endDate] ,[endTime], [message]
+     * start: [startDate], [startTime], message end: [startDate], [startTime], [endDate] ,[endTime], [message]
      * 
      * list: [date], [startDate, endDate], [startTime, endTime], [id] update: id, [startDate], [startTime], [endDate],
      * [endTime], [message] remove: id
      * 
      * addEarlier: [startDate], [startTime], [endDate], [endTime], [message]
      */
+    @SuppressWarnings("static-access")
     public static Options buildOptions() {
         Option startDate = OptionBuilder.withArgName(OPTION_DATE)
                 .withDescription("Start date (format: 2014.12.01. 12:24)").hasArg()
                 .create(OPTION_START_DATE);
-        // Option startTime = OptionBuilder.withArgName("time").hasArg()
-        // .withDescription("Start time (format: 12:12)")
-        // .create("startTime");
         Option endDate = OptionBuilder.withArgName(OPTION_DATE).hasArg()
                 .withDescription("End date (format: 2014.12.01. 12:24)")
                 .create(OPTION_END_DATE);
-        // Option endTime = OptionBuilder.withArgName("time").hasArg()
-        // .withDescription("End date (format: 12:12)")
-        // .create("endTime");
         Option date = OptionBuilder.withArgName(OPTION_DATE).hasArg()
                 .withDescription("Date (format: 2014.12.01. 12:24)")
                 .create(OPTION_DATE);
