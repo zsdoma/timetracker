@@ -1,6 +1,7 @@
 package hu.zsdoma.timetracker.cli;
 
 import hu.zsdoma.timetracker.api.TimeTracker;
+import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.utils.DateUtils;
 
 import java.util.Date;
@@ -13,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -110,7 +112,7 @@ public class OptionProcessorTest {
 
                 Date date = (Date) invocation.getArguments()[0];
                 Assert.assertEquals(DateUtils.dateFormatInstance().parse(endDate), date);
-                
+
                 String message = (String) invocation.getArguments()[1];
                 Assert.assertEquals("hello", message);
                 return null;
@@ -120,10 +122,10 @@ public class OptionProcessorTest {
 
         OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
         optionProcessor.process();
-        
+
         Mockito.verify(timeTrackerMock, Mockito.only()).end(Mockito.any(Date.class), Mockito.anyString());
     }
-    
+
     @Test
     public final void testEnd() throws Exception {
         final String endDate = "2014.01.12. 13:13";
@@ -149,8 +151,104 @@ public class OptionProcessorTest {
 
         OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
         optionProcessor.process();
-        
+
         Mockito.verify(timeTrackerMock, Mockito.only()).end(Mockito.any(Date.class));
+    }
+
+    @Test
+    public final void testRemove() throws Exception {
+        String[] args = new String[] { "-r", "-id", "1000" };
+
+        CommandLine commandLine = commandLineParser.parse(options, args);
+
+        TimeTracker timeTrackerMock = Mockito.mock(TimeTracker.class);
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Assert.assertNotNull(invocation);
+                Assert.assertNotNull(invocation.getArguments());
+                Assert.assertEquals(1, invocation.getArguments().length);
+
+                long id = (long) invocation.getArguments()[0];
+                Assert.assertEquals(1000, id);
+                return null;
+            }
+
+        }).when(timeTrackerMock).removeById(Mockito.anyLong());
+
+        OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
+        optionProcessor.process();
+
+        Mockito.verify(timeTrackerMock, Mockito.only()).removeById(Mockito.anyLong());
+    }
+
+    @Test
+    public final void testAddEarlier() throws Exception {
+        final String startString = "2014.01.12. 13:13";
+        final String endString = "2014.01.12. 13:23";
+        String message = "hello";
+        String[] args = new String[] { "-a", "-startDate", startString, "-endDate", endString, "-message", message };
+
+        final WorklogEntry expectedWorklogEntry = new WorklogEntry(DateUtils.dateFormatInstance().parse(startString),
+                DateUtils.dateFormatInstance().parse(endString), message);
+
+        CommandLine commandLine = commandLineParser.parse(options, args);
+
+        TimeTracker timeTrackerMock = Mockito.mock(TimeTracker.class);
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Assert.assertNotNull(invocation);
+                Assert.assertNotNull(invocation.getArguments());
+                Assert.assertEquals(1, invocation.getArguments().length);
+
+                WorklogEntry worklogEntry = (WorklogEntry) invocation.getArguments()[0];
+                Assert.assertEquals(expectedWorklogEntry, worklogEntry);
+                return null;
+            }
+
+        }).when(timeTrackerMock).addEarlier(Mockito.any(WorklogEntry.class));
+
+        OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
+        optionProcessor.process();
+
+        Mockito.verify(timeTrackerMock, Mockito.only()).addEarlier(Mockito.any(WorklogEntry.class));
+    }
+
+    @Test
+    public final void testUpdate() throws Exception {
+        final String startString = "2014.01.12. 13:13";
+        final String endString = "2014.01.12. 13:23";
+        String message = "hello";
+        String[] args = new String[] { "--update", "-id", "1000", "-startDate", startString, "-endDate", endString, "-message", message };
+
+        final WorklogEntry expectedWorklogEntry = new WorklogEntry(DateUtils.dateFormatInstance().parse(startString),
+                DateUtils.dateFormatInstance().parse(endString), message);
+
+        CommandLine commandLine = commandLineParser.parse(options, args);
+
+        TimeTracker timeTrackerMock = Mockito.mock(TimeTracker.class);
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Assert.assertNotNull(invocation);
+                Assert.assertNotNull(invocation.getArguments());
+                Assert.assertEquals(1, invocation.getArguments().length);
+
+                WorklogEntry worklogEntry = (WorklogEntry) invocation.getArguments()[0];
+                Assert.assertEquals(expectedWorklogEntry, worklogEntry);
+                return null;
+            }
+
+        }).when(timeTrackerMock).update(Mockito.any(WorklogEntry.class));
+
+        OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
+        optionProcessor.process();
+
+        Mockito.verify(timeTrackerMock, Mockito.only()).update(Mockito.any(WorklogEntry.class));
     }
 
 }

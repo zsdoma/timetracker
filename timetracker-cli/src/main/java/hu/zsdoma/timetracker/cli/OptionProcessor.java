@@ -1,6 +1,7 @@
 package hu.zsdoma.timetracker.cli;
 
 import hu.zsdoma.timetracker.api.TimeTracker;
+import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.utils.DateUtils;
 
 import java.text.ParseException;
@@ -8,18 +9,19 @@ import java.util.Date;
 import java.util.Objects;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
 public class OptionProcessor {
-
     public static final String OPTION_ID = "id";
     public static final String OPTION_DATE = "date";
     public static final String OPTION_MESSAGE = "message";
     public static final String OPTION_END_DATE = "endDate";
     public static final String OPTION_START_DATE = "startDate";
+    
     private CommandLine commandLine;
     private TimeTracker timeTracker;
 
@@ -37,26 +39,77 @@ public class OptionProcessor {
                 processEndCase();
             }
             if (commandLine.hasOption('l')) {
-                System.out.println("list worklogs");
+                throw new UnsupportedOperationException("Not implemented, yet.");
             }
             if (commandLine.hasOption('u')) {
-                System.out.println("update worklog");
+                processUpdateCase();
             }
             if (commandLine.hasOption('r')) {
-                System.out.println("remove worklog");
+                processRemmoveCase();
             }
             if (commandLine.hasOption('a')) {
-                System.out.println("add earlier worklog");
+                processAddEarlierCase();
             }
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void processUpdateCase() throws ParseException {
+        if (commandLine.hasOption(OPTION_ID)) {
+            Date startDate = processStartDate(false);
+            Date endDate = processEndDate(false);
+            String message = processMessage();
+            WorklogEntry worklogEntry = new WorklogEntry(startDate, endDate, message);
+            timeTracker.update(worklogEntry);
+        } else {
+            String missingOptionMessage = "The id option is required for update option.";
+            throwMissingOptionException(missingOptionMessage);
+        }
+    }
+
+    private void throwMissingOptionException(String missingOptionMessage) {
+        throw new RuntimeException(new MissingArgumentException(missingOptionMessage));
+    }
+
+    private void processAddEarlierCase() throws ParseException {
+        if (hasOptionsForAddEarlier()) {
+            String message = processMessage();
+            Date startDate = processStartDate(true);
+            Date endDate = processEndDate(true);
+            WorklogEntry worklogEntry = new WorklogEntry(startDate, endDate, message);
+            timeTracker.addEarlier(worklogEntry);
+        } else {
+            throwMissingOptionException("The startDate, endDate, message is required for addEarlier option.");
+        }
+    }
+
+    private boolean hasOptionsForAddEarlier() {
+        return commandLine.hasOption(OPTION_START_DATE) && commandLine.hasOption(OPTION_END_DATE)
+                && commandLine.hasOption(OPTION_MESSAGE);
+    }
+
+    private void processRemmoveCase() {
+        if (commandLine.hasOption(OPTION_ID)) {
+            Long id = processId(true);
+            timeTracker.removeById(id);
+        }
+    }
+
+    // FIXME require
+    private Long processId(boolean require) {
+        Long id = null;
+        try {
+            id = Long.parseLong(commandLine.getOptionValue(OPTION_ID));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(e);
+        }
+        return id;
+    }
+
     private void processEndCase() throws ParseException {
         if (commandLine.hasOption(OPTION_END_DATE)) {
-            Date endDate = processEndDate();
-            Objects.requireNonNull(endDate, "The endDate options required for end option.");
+            Date endDate = processEndDate(true);
             String message = processMessage();
             if (message == null) {
                 timeTracker.end(endDate);
@@ -64,25 +117,32 @@ public class OptionProcessor {
                 timeTracker.end(endDate, message);
             }
         } else {
-            System.out.println("The endDate options required for end option.");
+            throwMissingOptionException("The endDate options required for end option.");
         }
     }
 
-    private Date processEndDate() throws ParseException {
-        return parseDate(commandLine.getOptionValue(OPTION_END_DATE));
+    private Date processEndDate(boolean require) throws ParseException {
+        Date endDate = null;
+        if (commandLine.hasOption(OPTION_END_DATE)) {
+            endDate = parseDate(commandLine.getOptionValue(OPTION_END_DATE));
+        }
+        if (require && endDate == null) {
+            throwMissingOptionException("The endDate is required for this option.");
+        }
+        return endDate;
     }
 
     private void processStartCase() throws ParseException {
         if (commandLine.hasOption(OPTION_MESSAGE)) {
             String message = processMessage();
-            Date startDate = processStartDate();
+            Date startDate = processStartDate(false);
             if (startDate == null) {
                 timeTracker.start(message);
             } else {
                 timeTracker.startFrom(startDate, message);
             }
         } else {
-            System.out.println("Argument message is require for start option.");
+            throwMissingOptionException("Argument message is require for start option.");
         }
     }
 
@@ -91,13 +151,15 @@ public class OptionProcessor {
         return message;
     }
 
-    private Date processStartDate() throws ParseException {
-        Date startTime = null;
+    private Date processStartDate(boolean required) throws ParseException {
+        Date startDate = null;
         if (commandLine.hasOption(OPTION_START_DATE)) {
-            String startTimeString = commandLine.getOptionValue(OPTION_START_DATE);
-            startTime = parseDate(startTimeString);
+            startDate = parseDate(commandLine.getOptionValue(OPTION_START_DATE));
         }
-        return startTime;
+        if (required && startDate == null) {
+            throwMissingOptionException("The startDate is required for this option.");
+        }
+        return startDate;
     }
 
     private Date parseDate(String startTimeString) throws ParseException {
