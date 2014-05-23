@@ -204,7 +204,6 @@ public class OptionProcessor {
         Option addEarlier = new Option("a", "add-earlier", false, "Add earlier worklog.");
 
         OptionGroup commands = new OptionGroup();
-        commands.isRequired();
         commands.addOption(start);
         commands.addOption(end);
         commands.addOption(list);

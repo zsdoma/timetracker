@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBContext;
@@ -25,12 +26,21 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 public class XmlDataSource implements DataSource {
+    private static final ObjectFactory objectFactory = new ObjectFactory();
 
     private File file;
 
     public XmlDataSource(File file) {
         super();
+        checkFile(file);
         this.file = file;
+    }
+
+    private void checkFile(File file) {
+        Objects.requireNonNull(file);
+        if (file.isDirectory()) {
+            throw new RuntimeException("Given file is directory!");
+        }
     }
 
     @Override
@@ -62,45 +72,64 @@ public class XmlDataSource implements DataSource {
         Map<Long, WorklogEntry> worklogEntries = database.getWorklogs();
         ObjectFactory objectFactory = new ObjectFactory();
         TimeTracker timeTracker = objectFactory.createTimeTracker();
-
+        if (database.getCurrentWorklog() != null) {
+            timeTracker.setCurrentWorklog(convertEntryToWorklog(database.getCurrentWorklog()));
+        }
         for (WorklogEntry worklogEntry : worklogEntries.values()) {
-            Worklog worklog = objectFactory.createWorklog();
-            worklog.setId(worklogEntry.getId());
-            worklog.setBeginTime(worklogEntry.getBeginTimestamp());
-            worklog.setEndTime(worklogEntry.getEndTimeStamp());
-            worklog.setMessage(worklogEntry.getMessage());
+            Worklog worklog = convertEntryToWorklog(worklogEntry);
             timeTracker.getWorklogs().add(worklog);
         }
         return timeTracker;
     }
 
+    private Worklog convertEntryToWorklog(WorklogEntry worklogEntry) {
+        Worklog worklog = objectFactory.createWorklog();
+        worklog.setId(worklogEntry.getId());
+        worklog.setBeginTime(worklogEntry.getBeginTimestamp());
+        worklog.setEndTime(worklogEntry.getEndTimeStamp());
+        worklog.setMessage(worklogEntry.getMessage());
+        return worklog;
+    }
+
     @Override
     public TimeTrackerEntry load() {
-        TimeTracker timeTracker = null;
-        try {
-            timeTracker = loadTimeTracker();
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
+        TimeTrackerEntry database;
+        if (file.exists()) {
+            TimeTracker timeTracker = null;
+            try {
+                timeTracker = loadTimeTracker();
+            } catch (JAXBException e) {
+                throw new RuntimeException(e);
+            }
+
+            Map<Long, WorklogEntry> worklogEntries = parseTimeTrackerElement(timeTracker.getWorklogs());
+            WorklogEntry current = null;
+            if (timeTracker.getCurrentWorklog() != null) {
+                current = convertWorklogToEntry(timeTracker.getCurrentWorklog());
+            }
+            database = new TimeTrackerEntry(worklogEntries, current);
+        } else {
+            database = new TimeTrackerEntry();
         }
-
-        Map<Long, WorklogEntry> worklogEntries = parseTimeTrackerElement(timeTracker);
-
-        TimeTrackerEntry database = new TimeTrackerEntry(worklogEntries);
         return database;
     }
 
-    private Map<Long, WorklogEntry> parseTimeTrackerElement(TimeTracker timeTracker) {
-        List<Worklog> worklogs = timeTracker.getWorklogs();
-
+    private Map<Long, WorklogEntry> parseTimeTrackerElement(List<Worklog> worklogs) {
         Map<Long, WorklogEntry> worklogEntries = new HashMap<Long, WorklogEntry>();
         for (Worklog worklog : worklogs) {
-            long begin = worklog.getBeginTime();
-            long end = worklog.getEndTime();
-            String message = worklog.getMessage();
-            WorklogEntry worklogEntry = new WorklogEntry(new Date(begin), new Date(end), message);
+            WorklogEntry worklogEntry = convertWorklogToEntry(worklog);
             worklogEntries.put(worklog.getId(), worklogEntry);
         }
         return worklogEntries;
+    }
+
+    private WorklogEntry convertWorklogToEntry(Worklog worklog) {
+        WorklogEntry worklogEntry = null;
+        long begin = worklog.getBeginTime();
+        long end = worklog.getEndTime();
+        String message = worklog.getMessage();
+        worklogEntry = new WorklogEntry(new Date(begin), new Date(end), message);
+        return worklogEntry;
     }
 
     private TimeTracker loadTimeTracker() throws JAXBException {

@@ -6,15 +6,17 @@ import java.util.Map;
 public class TimeTrackerEntry {
 
     private Map<Long, WorklogEntry> worklogs;
+    private WorklogEntry currentWorklog;
 
     public TimeTrackerEntry() {
         super();
         this.worklogs = new HashMap<>();
     }
 
-    public TimeTrackerEntry(Map<Long, WorklogEntry> worklogs) {
+    public TimeTrackerEntry(Map<Long, WorklogEntry> worklogs, WorklogEntry currentWorklog) {
         super();
         this.worklogs = worklogs;
+        this.currentWorklog = currentWorklog;
     }
 
     public Map<Long, WorklogEntry> getWorklogs() {
@@ -29,6 +31,7 @@ public class TimeTrackerEntry {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((currentWorklog == null) ? 0 : currentWorklog.hashCode());
         result = prime * result + ((worklogs == null) ? 0 : worklogs.hashCode());
         return result;
     }
@@ -42,12 +45,30 @@ public class TimeTrackerEntry {
         if (getClass() != obj.getClass())
             return false;
         TimeTrackerEntry other = (TimeTrackerEntry) obj;
+        if (currentWorklog == null) {
+            if (other.currentWorklog != null)
+                return false;
+        } else if (!currentWorklog.equals(other.currentWorklog))
+            return false;
         if (worklogs == null) {
             if (other.worklogs != null)
                 return false;
         } else if (!worklogs.equals(other.worklogs))
             return false;
         return true;
+    }
+
+    public WorklogEntry getCurrentWorklog() {
+        return currentWorklog;
+    }
+
+    public void setCurrentWorklog(WorklogEntry currentWorklog) {
+        this.currentWorklog = currentWorklog;
+    }
+
+    @Override
+    public String toString() {
+        return "TimeTrackerEntry [worklogs=" + worklogs + ", currentWorklog=" + currentWorklog + "]";
     }
 
 }

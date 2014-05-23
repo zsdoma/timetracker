@@ -95,7 +95,7 @@ public class XmlDataSourceTest {
         end = dateFormat.parse("2010.01.12. 04:00:00");
         worklog = new WorklogEntry(begin, end, "worklog 2");
         worklogs.put(begin.getTime(), worklog);
-        return new TimeTrackerEntry(worklogs);
+        return new TimeTrackerEntry(worklogs, null);
     }
 
 }

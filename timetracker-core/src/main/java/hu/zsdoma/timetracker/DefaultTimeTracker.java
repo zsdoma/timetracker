@@ -37,10 +37,18 @@ public class DefaultTimeTracker implements TimeTracker {
         worklogs = database.getWorklogs();
     }
 
+    private void saveCurrentState() {
+        if (this.dataSource != null) {
+            TimeTrackerEntry timeTrackerEntry = new TimeTrackerEntry(worklogs, this.currentWorklog);
+            this.dataSource.save(timeTrackerEntry);
+        }
+    }
+
     @Override
     public void addEarlier(final WorklogEntry worklog) {
         check(worklog);
         worklogs.put(worklog.getId(), worklog);
+        saveCurrentState();
     }
 
     private void check(final WorklogEntry worklog) {
@@ -74,6 +82,7 @@ public class DefaultTimeTracker implements TimeTracker {
         currentWorklog.setEnd(endDate);
         worklogs.put(currentWorklog.getId(), currentWorklog);
         currentWorklog = null;
+        saveCurrentState();
     }
 
     @Override
@@ -119,6 +128,7 @@ public class DefaultTimeTracker implements TimeTracker {
     @Override
     public void removeById(final long worklogId) {
         worklogs.remove(worklogId);
+        saveCurrentState();
     }
 
     @Override
@@ -131,6 +141,7 @@ public class DefaultTimeTracker implements TimeTracker {
         WorklogEntry worklog = new WorklogEntry(DateUtils.normalizeDate(now), message);
         check(worklog);
         currentWorklog = worklog;
+        saveCurrentState();
     }
 
     @Override
@@ -138,6 +149,7 @@ public class DefaultTimeTracker implements TimeTracker {
         worklogs.remove(worklog.getId());
         check(worklog);
         worklogs.put(worklog.getId(), worklog);
+        saveCurrentState();
     }
 
 }

@@ -1,6 +1,6 @@
 package hu.zsdoma.timetracker.cli;
 
-import javax.xml.bind.annotation.XmlInlineBinaryData;
+import java.io.File;
 
 import hu.zsdoma.timetracker.DefaultTimeTracker;
 import hu.zsdoma.timetracker.xml.XmlDataSource;
@@ -15,10 +15,20 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class TimeTrackerMain {
+    /**
+     * Default database xml file name.
+     */
+    private static final String DATABASE_XML = "timetracker.xml";
 
+    /**
+     * {@link CommandLineParser} to parse command line arguments.
+     */
     private static CommandLineParser commandLineParser;
 
     public static void main(String[] args) {
+        String userHome = System.getProperty("user.home");
+        File xmlFile = getOrCreateXmlFile(userHome);
+
         commandLineParser = new GnuParser();
 
         Options options = OptionProcessor.buildOptions();
@@ -30,11 +40,11 @@ public class TimeTrackerMain {
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp("timetracker", options, true);
             } else {
-                XmlDataSource xmlDataSource = new XmlDataSource(null);
-                OptionProcessor optionsParser = new OptionProcessor(commandLine, new DefaultTimeTracker(xmlDataSource));
-                optionsParser.process();
+                XmlDataSource xmlDataSource = new XmlDataSource(xmlFile);
+                DefaultTimeTracker defaultTimeTracker = new DefaultTimeTracker(xmlDataSource);
+                OptionProcessor optionsProcessor = new OptionProcessor(commandLine, defaultTimeTracker);
+                optionsProcessor.process();
             }
-
         } catch (AlreadySelectedException e) {
             System.out.println("Choose only one from these options: s, e, l, u and r.");
         } catch (MissingArgumentException e) {
@@ -42,6 +52,10 @@ public class TimeTrackerMain {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static File getOrCreateXmlFile(String userHome) {
+        return new File(userHome + File.separator + DATABASE_XML);
     }
 
 }
