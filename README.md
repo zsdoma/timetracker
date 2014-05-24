@@ -1,4 +1,4 @@
-timetracker
+timetracker [![Build Status](https://travis-ci.org/github/maven-plugins.png)](https://travis-ci.org/zsdoma/timetracker)
 ===========
 
 TimeTracker application and library for ProgKörny course in University of Debrecen.

@@ -16,6 +16,13 @@
     </license>
   </licenses>
 
+  <contributors>
+    <contributor>
+      <name>Zsolt Doma</name>
+      <email>zsolt.doma@gmail.com</email>
+    </contributor>
+  </contributors>
+
   <inceptionYear>2014</inceptionYear>
 
   <properties>
@@ -126,7 +133,7 @@
   <distributionManagement>
     <site>
       <id>website</id>
-      <url>file:///tmp/fake.com/</url>
+      <url>https://github.com/zsdoma/timetracker</url>
     </site>
   </distributionManagement>
 
