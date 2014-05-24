@@ -29,7 +29,7 @@ public class DefaultTimeTrackerTest {
     public void testStartEnd() throws Exception {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.SECOND, 0);
-        calendar.roll(Calendar.MINUTE, false);
+        calendar.roll(Calendar.HOUR, false);
         timeTracker.startFrom(calendar.getTime(), "Start a test log.");
 
         WorklogEntry worklogEntry = timeTracker.current();
