@@ -34,6 +34,7 @@ public class DefaultTimeTracker implements TimeTracker {
         super();
         this.dataSource = dataSource;
         TimeTrackerEntry database = this.dataSource.load();
+        currentWorklog = database.getCurrentWorklog();
         worklogs = database.getWorklogs();
     }
 

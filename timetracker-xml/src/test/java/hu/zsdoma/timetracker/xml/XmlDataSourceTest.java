@@ -53,9 +53,13 @@ public class XmlDataSourceTest {
         XmlDataSource xmlDataSource = new XmlDataSource(testXml);
         xmlDataSource.save(timeTrackerEntry);
 
+        URI testFileURI = getClass().getResource("/test-timetracker.xml").toURI();
+        File expectedTestXml = new File(testFileURI);
+        String expectedXml = loadTestFile(expectedTestXml);
+        
         String xmlString = loadTestFile(testXml);
         Assert.assertEquals(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><timeTracker xmlns=\"http://www.example.org/worklog\">    <worklogs>        <id>1263264600000</id>        <message>worklog 2</message>        <beginTime>1263264600000</beginTime>        <endTime>1263265200000</endTime>    </worklogs>    <worklogs>        <id>1263263400000</id>        <message>worklog 1</message>        <beginTime>1263263400000</beginTime>        <endTime>1263264000000</endTime>    </worklogs></timeTracker>",
+                expectedXml,
                 xmlString);
     }
 
@@ -64,7 +68,9 @@ public class XmlDataSourceTest {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(testXml))) {
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
                 stringBuilder.append(line);
+//                stringBuilder.append("\n");
             }
         }
         return stringBuilder.toString();
@@ -80,6 +86,7 @@ public class XmlDataSourceTest {
 
         TimeTrackerEntry expectedTimeTrackerEntry = generateTimeTrackerEntry();
 
+        Assert.assertEquals(expectedTimeTrackerEntry.toString(), timeTrackerEntry.toString());
         Assert.assertEquals(expectedTimeTrackerEntry, timeTrackerEntry);
     }
 
@@ -95,7 +102,9 @@ public class XmlDataSourceTest {
         end = dateFormat.parse("2010.01.12. 04:00:00");
         worklog = new WorklogEntry(begin, end, "worklog 2");
         worklogs.put(begin.getTime(), worklog);
-        return new TimeTrackerEntry(worklogs, null);
+        
+        WorklogEntry currentWorklogEntry = new WorklogEntry(dateFormat.parse("2010.01.14. 05:10"), "current worklog");
+        return new TimeTrackerEntry(worklogs, currentWorklogEntry);
     }
 
 }
