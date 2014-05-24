@@ -68,9 +68,7 @@ public class XmlDataSourceTest {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(testXml))) {
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
-                System.out.println(line);
                 stringBuilder.append(line);
-//                stringBuilder.append("\n");
             }
         }
         return stringBuilder.toString();

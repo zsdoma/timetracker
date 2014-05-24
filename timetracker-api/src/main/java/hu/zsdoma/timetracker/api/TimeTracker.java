@@ -10,21 +10,11 @@ import java.util.List;
  */
 public interface TimeTracker {
 
-    /**
-     * List all worklogs.
-     * 
-     * @return List of all stored worklogs.
-     */
     List<WorklogEntry> list();
 
-    /**
-     * List work logs by given day in timestamp.
-     * 
-     * @param timestamp
-     *            Timestamp // FIXME javadoc
-     * @return {@link WorklogEntry} reference list.
-     */
     List<WorklogEntry> listByDay(long timestamp);
+
+    List<WorklogEntry> listAll();
 
     WorklogEntry findById(long id);
 
@@ -35,6 +25,8 @@ public interface TimeTracker {
     void end(Date now, String message);
 
     void end(Date now);
+
+    void end();
 
     WorklogEntry current();
 

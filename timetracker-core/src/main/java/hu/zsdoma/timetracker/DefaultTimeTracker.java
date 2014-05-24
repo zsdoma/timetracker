@@ -38,13 +38,6 @@ public class DefaultTimeTracker implements TimeTracker {
         worklogs = database.getWorklogs();
     }
 
-    private void saveCurrentState() {
-        if (this.dataSource != null) {
-            TimeTrackerEntry timeTrackerEntry = new TimeTrackerEntry(worklogs, this.currentWorklog);
-            this.dataSource.save(timeTrackerEntry);
-        }
-    }
-
     @Override
     public void addEarlier(final WorklogEntry worklog) {
         check(worklog);
@@ -57,24 +50,41 @@ public class DefaultTimeTracker implements TimeTracker {
 
         long now = new Date().getTime();
         long beginTimestamp = worklog.getBeginTimestamp();
-        if (worklog.isProgress()) {
-            if (beginTimestamp > now) {
-                throw new TimeTrackerException("Invalid begin time. Must be earlier like current date.");
-            }
-        } else {
-            long endTimeStamp = worklog.getEndTimeStamp();
-            if ((endTimeStamp > now) || (beginTimestamp >= endTimeStamp)) {
-                throw new TimeTrackerException("Invalid begin or end time. Must be earlier like current date.");
-            }
-            if (overlapCheck(beginTimestamp, endTimeStamp)) {
-                throw new TimeTrackerException("Time overlap!");
-            }
+        long endTimeStamp = worklog.getEndTimeStamp();
+        if ((endTimeStamp > now) || (beginTimestamp >= endTimeStamp)) {
+            throw new TimeTrackerException("Invalid begin or end time. Must be earlier like current date.");
+        }
+        if (overlapCheck(beginTimestamp, endTimeStamp)) {
+            throw new TimeTrackerException("Time overlap!");
+        }
+    }
+
+    private void checkStart(final WorklogEntry worklog) {
+        Objects.requireNonNull(worklog, "WorklogEntry is null!");
+
+        long now = new Date().getTime();
+        long beginTimestamp = worklog.getBeginTimestamp();
+
+        if (this.currentWorklog != null) {
+            throw new TimeTrackerException("A worklog already started.");
+        }
+
+        if (!worklog.isProgress()) {
+            throw new TimeTrackerException("Worklog has endTime!");
+        }
+        if (beginTimestamp > now) {
+            throw new TimeTrackerException("Invalid begin time. Must be earlier like current date.");
         }
     }
 
     @Override
     public WorklogEntry current() {
         return currentWorklog;
+    }
+
+    @Override
+    public void end() {
+        throw new UnsupportedOperationException("Not implemented, yet.");
     }
 
     @Override
@@ -99,6 +109,30 @@ public class DefaultTimeTracker implements TimeTracker {
 
     @Override
     public List<WorklogEntry> list() {
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.HOUR, 23);
+        today.set(Calendar.MINUTE, 59);
+        long startTimeStamp = today.getTimeInMillis();
+        long endTimestamp = today.getTimeInMillis();
+
+        List<WorklogEntry> todayWorklogs = new ArrayList<WorklogEntry>();
+
+        List<WorklogEntry> allWorklogs = listAll();
+        for (WorklogEntry worklogEntry : allWorklogs) {
+            if ((worklogEntry.getBeginTimestamp() >= startTimeStamp)
+                    && (worklogEntry.getEndTimeStamp() <= endTimestamp)) {
+                todayWorklogs.add(worklogEntry);
+            }
+        }
+
+        return todayWorklogs;
+    }
+
+    @Override
+    public List<WorklogEntry> listAll() {
         List<WorklogEntry> worklogs = new ArrayList<WorklogEntry>();
         for (WorklogEntry worklog : this.worklogs.values()) {
             worklogs.add(worklog);
@@ -132,6 +166,13 @@ public class DefaultTimeTracker implements TimeTracker {
         saveCurrentState();
     }
 
+    private void saveCurrentState() {
+        if (dataSource != null) {
+            TimeTrackerEntry timeTrackerEntry = new TimeTrackerEntry(worklogs, currentWorklog);
+            dataSource.save(timeTrackerEntry);
+        }
+    }
+
     @Override
     public void start(final String message) {
         startFrom(new Date(), message);
@@ -140,7 +181,7 @@ public class DefaultTimeTracker implements TimeTracker {
     @Override
     public void startFrom(final Date now, final String message) {
         WorklogEntry worklog = new WorklogEntry(DateUtils.normalizeDate(now), message);
-        check(worklog);
+        checkStart(worklog);
         currentWorklog = worklog;
         saveCurrentState();
     }
