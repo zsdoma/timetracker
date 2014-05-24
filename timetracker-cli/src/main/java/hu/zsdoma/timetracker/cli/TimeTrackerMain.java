@@ -1,9 +1,9 @@
 package hu.zsdoma.timetracker.cli;
 
-import java.io.File;
-
 import hu.zsdoma.timetracker.DefaultTimeTracker;
 import hu.zsdoma.timetracker.xml.XmlDataSource;
+
+import java.io.File;
 
 import org.apache.commons.cli.AlreadySelectedException;
 import org.apache.commons.cli.CommandLine;
@@ -13,8 +13,16 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimeTrackerMain {
+    
+    /**
+     * Logger.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeTrackerMain.class);
+
     /**
      * Default database xml file name.
      */

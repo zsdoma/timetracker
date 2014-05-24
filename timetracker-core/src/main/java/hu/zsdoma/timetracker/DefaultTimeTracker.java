@@ -7,6 +7,7 @@ import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.api.exception.TimeTrackerException;
 import hu.zsdoma.timetracker.utils.DateUtils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -16,10 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Default {@link TimeTracker} implementation.
  */
 public class DefaultTimeTracker implements TimeTracker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTimeTracker.class);
 
     private DataSource dataSource;
     private Map<Long, WorklogEntry> worklogs;
@@ -40,12 +46,13 @@ public class DefaultTimeTracker implements TimeTracker {
 
     @Override
     public void addEarlier(final WorklogEntry worklog) {
-        check(worklog);
+        checkForInsert(worklog);
         worklogs.put(worklog.getId(), worklog);
+        LOGGER.info("Add worklog: " + worklog);
         saveCurrentState();
     }
 
-    private void check(final WorklogEntry worklog) {
+    private void checkForInsert(final WorklogEntry worklog) {
         Objects.requireNonNull(worklog, "WorklogEntry is null!");
 
         long now = new Date().getTime();
@@ -59,7 +66,7 @@ public class DefaultTimeTracker implements TimeTracker {
         }
     }
 
-    private void checkStart(final WorklogEntry worklog) {
+    private void checkForStart(final WorklogEntry worklog) {
         Objects.requireNonNull(worklog, "WorklogEntry is null!");
 
         long now = new Date().getTime();
@@ -84,7 +91,7 @@ public class DefaultTimeTracker implements TimeTracker {
 
     @Override
     public void end() {
-        throw new UnsupportedOperationException("Not implemented, yet.");
+        end(new Date());
     }
 
     @Override
@@ -92,6 +99,7 @@ public class DefaultTimeTracker implements TimeTracker {
         Date endDate = DateUtils.normalizeDate(now);
         currentWorklog.setEnd(endDate);
         worklogs.put(currentWorklog.getId(), currentWorklog);
+        LOGGER.info(MessageFormat.format("Current worklog finished. [{0}]", currentWorklog));
         currentWorklog = null;
         saveCurrentState();
     }
@@ -128,6 +136,7 @@ public class DefaultTimeTracker implements TimeTracker {
             }
         }
 
+        LOGGER.info(MessageFormat.format("Fond {0} worklog(s) by today.", allWorklogs.size()));
         return todayWorklogs;
     }
 
@@ -138,6 +147,7 @@ public class DefaultTimeTracker implements TimeTracker {
             worklogs.add(worklog);
         }
         Collections.sort(worklogs);
+        LOGGER.info(MessageFormat.format("Fond {0} worklog(s) of all time.", worklogs.size()));
         return worklogs;
     }
 
@@ -162,14 +172,17 @@ public class DefaultTimeTracker implements TimeTracker {
 
     @Override
     public void removeById(final long worklogId) {
-        worklogs.remove(worklogId);
+        WorklogEntry removedWorklog = worklogs.remove(worklogId);
+        LOGGER.info(MessageFormat.format("Worklog removed [{0}]", removedWorklog));
         saveCurrentState();
     }
 
     private void saveCurrentState() {
         if (dataSource != null) {
+            LOGGER.info("Datasource fond, persist database.");
             TimeTrackerEntry timeTrackerEntry = new TimeTrackerEntry(worklogs, currentWorklog);
             dataSource.save(timeTrackerEntry);
+            LOGGER.info("Database persisted.");
         }
     }
 
@@ -181,16 +194,18 @@ public class DefaultTimeTracker implements TimeTracker {
     @Override
     public void startFrom(final Date now, final String message) {
         WorklogEntry worklog = new WorklogEntry(DateUtils.normalizeDate(now), message);
-        checkStart(worklog);
+        checkForStart(worklog);
         currentWorklog = worklog;
+        LOGGER.info(MessageFormat.format("Start worklog: {0}.", currentWorklog));
         saveCurrentState();
     }
 
     @Override
     public void update(final WorklogEntry worklog) {
-        worklogs.remove(worklog.getId());
-        check(worklog);
+        WorklogEntry oldWorklog = worklogs.remove(worklog.getId());
+        checkForInsert(worklog);
         worklogs.put(worklog.getId(), worklog);
+        LOGGER.info(MessageFormat.format("Worklog {0} updated with {1}.", oldWorklog, worklog));
         saveCurrentState();
     }
 
