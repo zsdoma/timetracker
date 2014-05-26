@@ -55,7 +55,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>hu.zsdoma.timetracker.tests.cli.TimeTrackerMain</mainClass>
+              <mainClass>hu.zsdoma.timetracker.cli.TimeTrackerMain</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
