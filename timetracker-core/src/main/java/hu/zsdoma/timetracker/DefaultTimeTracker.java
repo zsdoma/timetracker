@@ -176,9 +176,9 @@ public class DefaultTimeTracker implements TimeTracker {
         today.set(Calendar.HOUR, 0);
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);
+        long startTimeStamp = today.getTimeInMillis();
         today.set(Calendar.HOUR, 23);
         today.set(Calendar.MINUTE, 59);
-        long startTimeStamp = today.getTimeInMillis();
         long endTimestamp = today.getTimeInMillis();
 
         List<WorklogEntry> todayWorklogs = new ArrayList<WorklogEntry>();
@@ -195,6 +195,7 @@ public class DefaultTimeTracker implements TimeTracker {
         return todayWorklogs;
     }
 
+    // TODO empty list or null?
     @Override
     public List<WorklogEntry> listAll() {
         List<WorklogEntry> worklogs = new ArrayList<WorklogEntry>();

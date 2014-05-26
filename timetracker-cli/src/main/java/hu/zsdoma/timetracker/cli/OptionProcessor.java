@@ -5,8 +5,9 @@ import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.utils.DateUtils;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Objects;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
@@ -39,7 +40,7 @@ public class OptionProcessor {
                 processEndCase();
             }
             if (commandLine.hasOption('l')) {
-                throw new UnsupportedOperationException("Not implemented, yet.");
+                processListCase();
             }
             if (commandLine.hasOption('u')) {
                 processUpdateCase();
@@ -53,6 +54,41 @@ public class OptionProcessor {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void processListCase() throws ParseException {
+        Date date = processDate();
+        List<WorklogEntry> worklogs = Collections.emptyList();
+        if (date != null) {
+            worklogs = timeTracker.listByDay(date.getTime());
+        } else {
+            worklogs = timeTracker.list();
+        }
+        if (worklogs != null) {
+            showWorklogs(worklogs);
+        }
+    }
+
+    private void showWorklogs(List<WorklogEntry> worklogs) {
+        String leftAlignFormat = "| %-13d | %-17s | %-17s | %-25s |%n";
+
+        System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
+        System.out.printf("| Id            | Start Date        | End Date          | Message                   |%n");
+        System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
+        for (WorklogEntry worklogEntry : worklogs) {
+            String start = DateUtils.dateFormatInstance().format(new Date(worklogEntry.getBeginTimestamp()));
+            String end = DateUtils.dateFormatInstance().format(new Date(worklogEntry.getEndTimeStamp()));
+            System.out.format(leftAlignFormat, worklogEntry.getId(), start, end, worklogEntry.getMessage());
+        }
+        System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
+    }
+
+    private Date processDate() throws ParseException {
+        Date date = null;
+        if (commandLine.hasOption(OPTION_DATE)) {
+            date = parseDate(commandLine.getOptionValue(OPTION_DATE));
+        }
+        return date;
     }
 
     private void processUpdateCase() throws ParseException {
