@@ -174,6 +174,7 @@ public class DefaultTimeTracker implements TimeTracker {
     @Override
     public List<WorklogEntry> list() {
         Calendar today = Calendar.getInstance();
+        today.setTime(new Date());
         today.set(Calendar.HOUR, 0);
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);
@@ -192,11 +193,15 @@ public class DefaultTimeTracker implements TimeTracker {
             }
         }
 
-        LOGGER.info(MessageFormat.format("Fond {0} worklog(s) by today.", allWorklogs.size()));
+        LOGGER.info(MessageFormat.format("Fond {0} worklog(s) by today.", todayWorklogs.size()));
         return todayWorklogs;
     }
 
-    // TODO empty list or null?
+    /**
+     * List all worklogs or empty list.
+     * 
+     * @return List of all {@link WorklogEntry}s.
+     */
     @Override
     public List<WorklogEntry> listAll() {
         List<WorklogEntry> worklogs = new ArrayList<WorklogEntry>();
@@ -208,9 +213,38 @@ public class DefaultTimeTracker implements TimeTracker {
         return worklogs;
     }
 
+    /**
+     * List worklogs by day. List worklogs that started after the given day start (00h:00m) and before a given day end
+     * (23h:59m). Only the start time relevant.
+     * 
+     * @param timestamp
+     *            The day in timestamp.
+     * @return List of {@link WorklogEntry} by the given date.
+     */
     @Override
     public List<WorklogEntry> listByDay(final long timestamp) {
-        throw new UnsupportedOperationException("Not implemented, yet.");
+        Calendar today = Calendar.getInstance();
+        today.setTimeInMillis(timestamp);
+        today.set(Calendar.HOUR, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        long startTimeStamp = today.getTimeInMillis();
+        today.set(Calendar.HOUR, 23);
+        today.set(Calendar.MINUTE, 59);
+        long endTimestamp = today.getTimeInMillis();
+
+        List<WorklogEntry> todayWorklogs = new ArrayList<WorklogEntry>();
+
+        List<WorklogEntry> allWorklogs = listAll();
+        for (WorklogEntry worklogEntry : allWorklogs) {
+            if ((worklogEntry.getBeginTimestamp() >= startTimeStamp)
+                    && (worklogEntry.getBeginTimestamp() <= endTimestamp)) {
+                todayWorklogs.add(worklogEntry);
+            }
+        }
+
+        LOGGER.info(MessageFormat.format("Fond {0} worklog(s) by day.", todayWorklogs.size()));
+        return todayWorklogs;
     }
 
     @Override

@@ -10,9 +10,14 @@ import java.util.Date;
 public final class DateUtils {
 
     /**
+     * Date-Time format pattern.
+     */
+    public static final String DATE_TIME_FORMAT = "yyyy.MM.dd. HH:mm";
+    
+    /**
      * Date format pattern.
      */
-    public static final String DATE_FORMAT = "yyyy.MM.dd. HH:mm";
+    public static final String DATE_FORMAT = "yyyy.MM.dd.";
 
     /**
      * Default utility constructor.
@@ -21,6 +26,15 @@ public final class DateUtils {
         super();
     }
 
+    /**
+     * Create a {@link SimpleDateFormat} instance with {@link #DATE_TIME_FORMAT} pattern.
+     * 
+     * @return {@link SimpleDateFormat} reference.
+     */
+    public static final SimpleDateFormat dateTimeFormatInstance() {
+        return new SimpleDateFormat(DATE_TIME_FORMAT);
+    }
+    
     /**
      * Create a {@link SimpleDateFormat} instance with {@link #DATE_FORMAT} pattern.
      * 

@@ -89,7 +89,7 @@ public class OptionProcessorTest {
                 Assert.assertEquals(2, invocation.getArguments().length);
 
                 Date date = (Date) invocation.getArguments()[0];
-                Assert.assertEquals(DateUtils.dateFormatInstance().parse(startDate), date);
+                Assert.assertEquals(DateUtils.dateTimeFormatInstance().parse(startDate), date);
 
                 String message = (String) invocation.getArguments()[1];
                 Assert.assertEquals("hello", message);
@@ -121,7 +121,7 @@ public class OptionProcessorTest {
                 Assert.assertEquals(2, invocation.getArguments().length);
 
                 Date date = (Date) invocation.getArguments()[0];
-                Assert.assertEquals(DateUtils.dateFormatInstance().parse(endDate), date);
+                Assert.assertEquals(DateUtils.dateTimeFormatInstance().parse(endDate), date);
 
                 String message = (String) invocation.getArguments()[1];
                 Assert.assertEquals("hello", message);
@@ -153,7 +153,7 @@ public class OptionProcessorTest {
                 Assert.assertEquals(2, invocation.getArguments().length);
 
                 Date date = (Date) invocation.getArguments()[0];
-                Assert.assertEquals(DateUtils.dateFormatInstance().parse(endDate), date);
+                Assert.assertEquals(DateUtils.dateTimeFormatInstance().parse(endDate), date);
                 Assert.assertNull(invocation.getArguments()[1]);
                 return null;
             }
@@ -229,8 +229,8 @@ public class OptionProcessorTest {
         String message = "hello";
         String[] args = new String[] { "-a", "-startDate", startString, "-endDate", endString, "-message", message };
 
-        final WorklogEntry expectedWorklogEntry = new WorklogEntry(DateUtils.dateFormatInstance().parse(startString),
-                DateUtils.dateFormatInstance().parse(endString), message);
+        final WorklogEntry expectedWorklogEntry = new WorklogEntry(DateUtils.dateTimeFormatInstance().parse(startString),
+                DateUtils.dateTimeFormatInstance().parse(endString), message);
 
         CommandLine commandLine = commandLineParser.parse(options, args);
 
@@ -264,8 +264,8 @@ public class OptionProcessorTest {
         String[] args = new String[] { "--update", "-id", "1000", "-startDate", startString, "-endDate", endString,
                 "-message", message };
 
-        final WorklogEntry expectedWorklogEntry = new WorklogEntry(DateUtils.dateFormatInstance().parse(startString),
-                DateUtils.dateFormatInstance().parse(endString), message);
+        final WorklogEntry expectedWorklogEntry = new WorklogEntry(DateUtils.dateTimeFormatInstance().parse(startString),
+                DateUtils.dateTimeFormatInstance().parse(endString), message);
 
         CommandLine commandLine = commandLineParser.parse(options, args);
 

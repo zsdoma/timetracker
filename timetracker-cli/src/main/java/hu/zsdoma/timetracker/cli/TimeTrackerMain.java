@@ -75,6 +75,10 @@ public class TimeTrackerMain {
             LOGGER.error(e.getMessage());
         } catch (TimeTrackerException e) {
             LOGGER.error(e.getMessage());
+        } catch (java.text.ParseException e) {
+            LOGGER.error(e.getMessage());
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage());
         }
     }
 

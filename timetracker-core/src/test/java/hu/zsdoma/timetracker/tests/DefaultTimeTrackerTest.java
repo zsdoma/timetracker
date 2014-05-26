@@ -71,7 +71,7 @@ public class DefaultTimeTrackerTest {
      */
     @Test
     public final void testAddEarlier() throws Exception {
-        DateFormat dateFormat = DateUtils.dateFormatInstance();
+        DateFormat dateFormat = DateUtils.dateTimeFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
         WorklogEntry worklog = new WorklogEntry(begin, end, "worklog 1");
@@ -97,7 +97,7 @@ public class DefaultTimeTrackerTest {
      */
     @Test
     public void testRemove() throws Exception {
-        DateFormat dateFormat = DateUtils.dateFormatInstance();
+        DateFormat dateFormat = DateUtils.dateTimeFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
         WorklogEntry worklogDTO = new WorklogEntry(begin, end, "worklog 1");
@@ -120,7 +120,7 @@ public class DefaultTimeTrackerTest {
      */
     @Test
     public final void testUpdate() throws Exception {
-        DateFormat dateFormat = DateUtils.dateFormatInstance();
+        DateFormat dateFormat = DateUtils.dateTimeFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         long id = begin.getTime();
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
@@ -154,7 +154,7 @@ public class DefaultTimeTrackerTest {
      */
     @Test(expected = TimeTrackerException.class)
     public void testOverlapAfter() throws ParseException, TimeTrackerException {
-        DateFormat dateFormat = DateUtils.dateFormatInstance();
+        DateFormat dateFormat = DateUtils.dateTimeFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
         WorklogEntry worklog = new WorklogEntry(begin, end, "worklog 1");
@@ -180,7 +180,7 @@ public class DefaultTimeTrackerTest {
      */
     @Test(expected = TimeTrackerException.class)
     public void testOverlapBefore() throws ParseException, TimeTrackerException {
-        DateFormat dateFormat = DateUtils.dateFormatInstance();
+        DateFormat dateFormat = DateUtils.dateTimeFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
         WorklogEntry worklog = new WorklogEntry(begin, end, "worklog 1");

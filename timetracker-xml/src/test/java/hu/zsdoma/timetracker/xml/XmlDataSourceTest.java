@@ -93,7 +93,7 @@ public class XmlDataSourceTest {
 
     private TimeTrackerEntry generateTimeTrackerEntry() throws ParseException {
         Map<Long, WorklogEntry> worklogs = new HashMap<Long, WorklogEntry>();
-        DateFormat dateFormat = DateUtils.dateFormatInstance();
+        DateFormat dateFormat = DateUtils.dateTimeFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
         WorklogEntry worklog = new WorklogEntry(begin, end, "worklog 1");

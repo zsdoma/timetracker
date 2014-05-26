@@ -71,29 +71,28 @@ public class OptionProcessor {
 
     /**
      * Process the given command line.
+     * 
+     * @throws ParseException
+     *             throw this when the date format wrong.
      */
-    public void process() {
-        try {
-            if (commandLine.hasOption('s')) {
-                processStartCase();
-            }
-            if (commandLine.hasOption('e')) {
-                processEndCase();
-            }
-            if (commandLine.hasOption('l')) {
-                processListCase();
-            }
-            if (commandLine.hasOption('u')) {
-                processUpdateCase();
-            }
-            if (commandLine.hasOption('r')) {
-                processRemmoveCase();
-            }
-            if (commandLine.hasOption('a')) {
-                processAddEarlierCase();
-            }
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+    public void process() throws ParseException {
+        if (commandLine.hasOption('s')) {
+            processStartCase();
+        }
+        if (commandLine.hasOption('e')) {
+            processEndCase();
+        }
+        if (commandLine.hasOption('l')) {
+            processListCase();
+        }
+        if (commandLine.hasOption('u')) {
+            processUpdateCase();
+        }
+        if (commandLine.hasOption('r')) {
+            processRemmoveCase();
+        }
+        if (commandLine.hasOption('a')) {
+            processAddEarlierCase();
         }
     }
 
@@ -106,13 +105,18 @@ public class OptionProcessor {
     private void processListCase() throws ParseException {
         Date date = processDate();
         List<WorklogEntry> worklogs = Collections.emptyList();
+        WorklogEntry currentWorklogEntry = null;
         if (date != null) {
             worklogs = timeTracker.listByDay(date.getTime());
         } else {
             worklogs = timeTracker.list();
+            currentWorklogEntry = timeTracker.current();
         }
         if (worklogs != null) {
             showWorklogs(worklogs);
+        }
+        if (currentWorklogEntry != null) {
+            showCurrentWorklog(currentWorklogEntry);
         }
     }
 
@@ -124,16 +128,25 @@ public class OptionProcessor {
      */
     private void showWorklogs(List<WorklogEntry> worklogs) {
         String leftAlignFormat = "| %-13d | %-17s | %-17s | %-25s |%n";
-
         System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
         System.out.printf("| Id            | Start Date        | End Date          | Message                   |%n");
         System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
         for (WorklogEntry worklogEntry : worklogs) {
-            String start = DateUtils.dateFormatInstance().format(new Date(worklogEntry.getBeginTimestamp()));
-            String end = DateUtils.dateFormatInstance().format(new Date(worklogEntry.getEndTimeStamp()));
+            String start = DateUtils.dateTimeFormatInstance().format(new Date(worklogEntry.getBeginTimestamp()));
+            String end = DateUtils.dateTimeFormatInstance().format(new Date(worklogEntry.getEndTimeStamp()));
             System.out.format(leftAlignFormat, worklogEntry.getId(), start, end, worklogEntry.getMessage());
         }
         System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
+    }
+
+    private void showCurrentWorklog(WorklogEntry worklogEntry) {
+        String leftAlignFormat = "| %-13d | %-17s | %-25s |%n";
+        System.out.format("+---------------+-------------------+---------------------------+%n");
+        System.out.printf("| Id            | Start Date        | Message                   |%n");
+        System.out.format("+---------------+-------------------+---------------------------+%n");
+        String start = DateUtils.dateTimeFormatInstance().format(new Date(worklogEntry.getBeginTimestamp()));
+        System.out.format(leftAlignFormat, worklogEntry.getId(), start, worklogEntry.getMessage());
+        System.out.format("+---------------+-------------------+---------------------------+%n");
     }
 
     /**
@@ -259,7 +272,7 @@ public class OptionProcessor {
     private Date processEndDate(boolean require) throws ParseException {
         Date endDate = null;
         if (commandLine.hasOption(OPTION_END_DATE)) {
-            endDate = parseDate(commandLine.getOptionValue(OPTION_END_DATE));
+            endDate = parseDateTime(commandLine.getOptionValue(OPTION_END_DATE));
         }
         if (require && endDate == null) {
             throwMissingOptionException("The endDate is required for this option.");
@@ -309,12 +322,29 @@ public class OptionProcessor {
     private Date processStartDate(boolean required) throws ParseException {
         Date startDate = null;
         if (commandLine.hasOption(OPTION_START_DATE)) {
-            startDate = parseDate(commandLine.getOptionValue(OPTION_START_DATE));
+            startDate = parseDateTime(commandLine.getOptionValue(OPTION_START_DATE));
         }
         if (required && startDate == null) {
             throwMissingOptionException("The startDate is required for this option.");
         }
         return startDate;
+    }
+
+    /**
+     * Parse date string to {@link Date} instance. Use {@link DateUtils#DATE_TIME_FORMAT} pattern.
+     * 
+     * @param dateTimeString
+     *            date string.
+     * @return {@link Date} instance or null.
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
+    private Date parseDateTime(String dateTimeString) throws ParseException {
+        Date dateTime = null;
+        if (dateTimeString != null) {
+            dateTime = DateUtils.dateTimeFormatInstance().parse(dateTimeString);
+        }
+        return dateTime;
     }
 
     /**
@@ -327,11 +357,11 @@ public class OptionProcessor {
      *             throw this when the date format wrong.
      */
     private Date parseDate(String dateString) throws ParseException {
-        Date startTime = null;
+        Date date = null;
         if (dateString != null) {
-            startTime = DateUtils.dateFormatInstance().parse(dateString);
+            date = DateUtils.dateFormatInstance().parse(dateString);
         }
-        return startTime;
+        return date;
     }
 
     /**
@@ -348,7 +378,7 @@ public class OptionProcessor {
                 .withDescription("End date (format: 2014.12.01. 12:24)")
                 .create(OPTION_END_DATE);
         Option date = OptionBuilder.withArgName(OPTION_DATE).hasArg()
-                .withDescription("Date (format: 2014.12.01. 12:24)")
+                .withDescription("Date (format: 2014.12.01.)")
                 .create(OPTION_DATE);
         Option message = OptionBuilder.withArgName(OPTION_MESSAGE).hasArg()
                 .withDescription("Worklog message")
@@ -357,11 +387,11 @@ public class OptionProcessor {
                 .withDescription("Worklog id. Only for 'list' and 'remove' case.")
                 .create(OPTION_ID);
 
-        Option start = new Option("s", "start", false, "Start worklog now.");
-        Option end = new Option("e", "end", false, "End worklog now.");
-        Option list = new Option("l", "list", false, "List all worklogs.");
-        Option update = new Option("u", "update", false, "Update worklog.");
-        Option remove = new Option("r", "remove", false, "Remove worklog by id.");
+        Option start = new Option("s", "start", false, "Start worklog now. (-startDate and message optional).");
+        Option end = new Option("e", "end", false, "End worklog now. (-endDate and -message optional)");
+        Option list = new Option("l", "list", false, "List worklogs by given day (-date). Default the current day.");
+        Option update = new Option("u", "update", false, "Update worklog by id. (-id required)");
+        Option remove = new Option("r", "remove", false, "Remove worklog by id. (-id required)");
         Option addEarlier = new Option("a", "add-earlier", false, "Add earlier worklog.");
 
         OptionGroup commands = new OptionGroup();
