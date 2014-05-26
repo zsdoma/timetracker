@@ -21,7 +21,7 @@ public class OptionProcessor {
     public static final String OPTION_MESSAGE = "message";
     public static final String OPTION_END_DATE = "endDate";
     public static final String OPTION_START_DATE = "startDate";
-    
+
     private CommandLine commandLine;
     private TimeTracker timeTracker;
 
@@ -108,17 +108,7 @@ public class OptionProcessor {
     }
 
     private void processEndCase() throws ParseException {
-        if (commandLine.hasOption(OPTION_END_DATE)) {
-            Date endDate = processEndDate(true);
-            String message = processMessage();
-            if (message == null) {
-                timeTracker.end(endDate);
-            } else {
-                timeTracker.end(endDate, message);
-            }
-        } else {
-            throwMissingOptionException("The endDate options required for end option.");
-        }
+        timeTracker.end(processEndDate(false), processMessage());
     }
 
     private Date processEndDate(boolean require) throws ParseException {

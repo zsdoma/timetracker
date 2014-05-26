@@ -25,17 +25,40 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultTimeTracker implements TimeTracker {
 
+    /**
+     * Logger.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTimeTracker.class);
 
+    /**
+     * {@link DataSource} reference for provide persistent database.
+     */
     private DataSource dataSource;
+
+    /**
+     * Temporary stored worklogs map, indexed by start timestamp.
+     */
     private Map<Long, WorklogEntry> worklogs;
+
+    /**
+     * Current worklog reference. Started, but not finished worklog entry.
+     */
     private WorklogEntry currentWorklog;
 
+    /**
+     * Default constructor. Create a empty worklogs map.
+     */
     public DefaultTimeTracker() {
         super();
         worklogs = new HashMap<>();
     }
 
+    /**
+     * Constructor with {@link DataSource} referencem to load worklog entries from given datasource.
+     * 
+     * @param dataSource
+     *            {@link DataSource} reference.
+     */
     public DefaultTimeTracker(final DataSource dataSource) {
         super();
         this.dataSource = dataSource;
@@ -44,6 +67,13 @@ public class DefaultTimeTracker implements TimeTracker {
         worklogs = database.getWorklogs();
     }
 
+    /**
+     * Add earlier worklog instance to current {@link TimeTrackerEntry}. If {@link DataSource} reference not null, then
+     * call {@link DataSource#save(TimeTrackerEntry)} method after the new entry is added.
+     * 
+     * @param worklog
+     *            {@link WorklogEntry} reference.
+     */
     @Override
     public void addEarlier(final WorklogEntry worklog) {
         checkForInsert(worklog);
@@ -52,6 +82,12 @@ public class DefaultTimeTracker implements TimeTracker {
         saveCurrentState();
     }
 
+    /**
+     * Check database consistency for insert/update given worklog entry.
+     * 
+     * @param worklog
+     *            {@link WorklogEntry} reference.
+     */
     private void checkForInsert(final WorklogEntry worklog) {
         Objects.requireNonNull(worklog, "WorklogEntry is null!");
 
@@ -66,6 +102,13 @@ public class DefaultTimeTracker implements TimeTracker {
         }
     }
 
+    /**
+     * Check database consistency for start worklog. Called before add new start entry with {@link #start(String)} or
+     * {@link #startFrom(Date, String)} methods.
+     * 
+     * @param worklog
+     *            {@link WorklogEntry} reference.
+     */
     private void checkForStart(final WorklogEntry worklog) {
         Objects.requireNonNull(worklog, "WorklogEntry is null!");
 
@@ -84,6 +127,11 @@ public class DefaultTimeTracker implements TimeTracker {
         }
     }
 
+    /**
+     * Return the current {@link WorklogEntry} reference, if exists.
+     * 
+     * @return The Current {@link WorklogEntry} reference or null.
+     */
     @Override
     public WorklogEntry current() {
         return currentWorklog;
@@ -91,23 +139,30 @@ public class DefaultTimeTracker implements TimeTracker {
 
     @Override
     public void end() {
-        end(new Date());
+        end(null, null);
     }
 
     @Override
     public void end(final Date now) {
-        Date endDate = DateUtils.normalizeDate(now);
+        end(now, null);
+    }
+
+    @Override
+    public void end(final Date now, final String message) {
+        if (message != null) {
+            currentWorklog.setMessage(message);
+        }
+        Date endDate;
+        if (now == null) {
+            endDate = DateUtils.normalizeDate(new Date());
+        } else {
+            endDate = DateUtils.normalizeDate(now);
+        }
         currentWorklog.setEnd(endDate);
         worklogs.put(currentWorklog.getId(), currentWorklog);
         LOGGER.info(MessageFormat.format("Current worklog finished. [{0}]", currentWorklog));
         currentWorklog = null;
         saveCurrentState();
-    }
-
-    @Override
-    public void end(final Date now, final String message) {
-        currentWorklog.setMessage(message);
-        end(now);
     }
 
     @Override
@@ -177,6 +232,10 @@ public class DefaultTimeTracker implements TimeTracker {
         saveCurrentState();
     }
 
+    /**
+     * If the {@link DataSource} is not null, call {@link DataSource#save(TimeTrackerEntry)} method with given
+     * timetracker state (with current and all worklogs).
+     */
     private void saveCurrentState() {
         if (dataSource != null) {
             LOGGER.info("Datasource fond, persist database.");

@@ -1,6 +1,7 @@
 package hu.zsdoma.timetracker.cli;
 
 import hu.zsdoma.timetracker.DefaultTimeTracker;
+import hu.zsdoma.timetracker.api.exception.TimeTrackerException;
 import hu.zsdoma.timetracker.xml.XmlDataSource;
 
 import java.io.File;
@@ -17,7 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TimeTrackerMain {
-    
+
+    private static final String TIMETRACKER_FOLDER = ".timetracker";
+
     /**
      * Logger.
      */
@@ -54,16 +57,24 @@ public class TimeTrackerMain {
                 optionsProcessor.process();
             }
         } catch (AlreadySelectedException e) {
-            System.out.println("Choose only one from these options: s, e, l, u and r.");
+            LOGGER.error("Choose only one from these options: s, e, l, u and r.");
         } catch (MissingArgumentException e) {
-            System.out.println(e.getMessage());
+            LOGGER.error(e.getMessage());
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(e.getMessage());
+        } catch (TimeTrackerException e) {
+            LOGGER.error(e.getMessage());
         }
     }
 
     private static File getOrCreateXmlFile(String userHome) {
-        return new File(userHome + File.separator + DATABASE_XML);
+        File timetrackerFolder = new File(userHome + File.separator + TIMETRACKER_FOLDER);
+        if (!timetrackerFolder.exists()) {
+            if (!timetrackerFolder.mkdir()) {
+                throw new TimeTrackerException("Can't create .timetracker folder in user home.");
+            }
+        }
+        return new File(userHome + File.separator + TIMETRACKER_FOLDER + File.separator + DATABASE_XML);
     }
 
 }

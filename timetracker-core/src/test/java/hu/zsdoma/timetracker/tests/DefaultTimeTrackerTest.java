@@ -1,5 +1,6 @@
-package hu.zsdoma.timetracker;
+package hu.zsdoma.timetracker.tests;
 
+import hu.zsdoma.timetracker.DefaultTimeTracker;
 import hu.zsdoma.timetracker.api.TimeTracker;
 import hu.zsdoma.timetracker.api.dto.WorklogEntry;
 import hu.zsdoma.timetracker.api.exception.TimeTrackerException;
@@ -16,15 +17,30 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test class for {@link DefaultTimeTracker}.
+ */
 public class DefaultTimeTrackerTest {
 
+    /**
+     * {@link TimeTracker} reference.
+     */
     private TimeTracker timeTracker;
 
+    /**
+     * Create a new {@link DefaultTimeTracker} instance.
+     */
     @Before
     public void setUp() {
         this.timeTracker = new DefaultTimeTracker();
     }
 
+    /**
+     * Test for start and end functionality.
+     * 
+     * @throws Exception
+     *             exception that occurred during the test.
+     */
     @Test
     public void testStartEnd() throws Exception {
         Calendar calendar = Calendar.getInstance();
@@ -34,7 +50,7 @@ public class DefaultTimeTrackerTest {
 
         WorklogEntry worklogEntry = timeTracker.current();
         Assert.assertEquals("Start a test log.", worklogEntry.getMessage());
-        
+
         try {
             timeTracker.startFrom(new Date(calendar.getTimeInMillis() + 20000), "Start a test log, again");
             Assert.fail("Don't thronw TimeTrackerException.");
@@ -47,6 +63,12 @@ public class DefaultTimeTrackerTest {
         Assert.assertEquals("Start a test log and end to.", worklogEntry.getMessage());
     }
 
+    /**
+     * Tests for add earlier method.
+     * 
+     * @throws Exception
+     *             exception that occurred during the test.
+     */
     @Test
     public final void testAddEarlier() throws Exception {
         DateFormat dateFormat = DateUtils.dateFormatInstance();
@@ -67,6 +89,12 @@ public class DefaultTimeTrackerTest {
         Assert.assertEquals(Arrays.asList(worklog, worklogDTO1), list);
     }
 
+    /**
+     * Tests for remove worklog functionality.
+     * 
+     * @throws Exception
+     *             exception that occurred during the test.
+     */
     @Test
     public void testRemove() throws Exception {
         DateFormat dateFormat = DateUtils.dateFormatInstance();
@@ -84,8 +112,14 @@ public class DefaultTimeTrackerTest {
         Assert.assertTrue(list.isEmpty());
     }
 
+    /**
+     * Test for update worklog functionality.
+     * 
+     * @throws Exception
+     *             exception that occurred during the test.
+     */
     @Test
-    public final void testUpdate() throws ParseException {
+    public final void testUpdate() throws Exception {
         DateFormat dateFormat = DateUtils.dateFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         long id = begin.getTime();
@@ -110,8 +144,16 @@ public class DefaultTimeTrackerTest {
         Assert.assertEquals(list.get(0).getMessage(), testMessage);
     }
 
+    /**
+     * Test for time overlap checks, when the new worklog started earlier and ended later then a existed worklog ended.
+     * 
+     * @throws ParseException
+     *             throwing during parse date strings.
+     * @throws TimeTrackerException
+     *             expected TimeTrackerException when overlap check is true.
+     */
     @Test(expected = TimeTrackerException.class)
-    public void testOverlapAfter() throws Exception {
+    public void testOverlapAfter() throws ParseException, TimeTrackerException {
         DateFormat dateFormat = DateUtils.dateFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
@@ -127,8 +169,17 @@ public class DefaultTimeTrackerTest {
         timeTracker.addEarlier(worklogDTO1);
     }
 
+    /**
+     * Test for time overlap checks, when the new worklog started earlier and ended later then a existed worklog
+     * started.
+     * 
+     * @throws ParseException
+     *             throwing during parse date strings.
+     * @throws TimeTrackerException
+     *             expected TimeTrackerException when overlap check is true.
+     */
     @Test(expected = TimeTrackerException.class)
-    public void testOverlapBefore() throws Exception {
+    public void testOverlapBefore() throws ParseException, TimeTrackerException {
         DateFormat dateFormat = DateUtils.dateFormatInstance();
         Date begin = dateFormat.parse("2010.01.12. 03:30:00");
         Date end = dateFormat.parse("2010.01.12. 03:40:00");
@@ -144,8 +195,14 @@ public class DefaultTimeTrackerTest {
         timeTracker.addEarlier(worklogDTO1);
     }
 
+    /**
+     * Test for start worklog in the future.
+     * 
+     * @throws TimeTrackerException
+     *             expected {@link TimeTrackerException} then the start of worklog at in the future.
+     */
     @Test(expected = TimeTrackerException.class)
-    public void testFutureStart() throws Exception {
+    public void testFutureStart() throws TimeTrackerException {
         Date now = new Date();
         Date begin = new Date(now.getTime() + 20000);
         Date end = new Date(now.getTime() + 40000);
@@ -153,8 +210,14 @@ public class DefaultTimeTrackerTest {
         timeTracker.addEarlier(worklog);
     }
 
+    /**
+     * Test for end a worklog in the future.
+     * 
+     * @throws TimeTrackerException
+     *             expected {@link TimeTrackerException} then the end of worklog at in the future.
+     */
     @Test(expected = TimeTrackerException.class)
-    public void testFutureEnd() throws Exception {
+    public void testFutureEnd() throws TimeTrackerException {
         Date begin = new Date();
         Date end = new Date(begin.getTime() + 40000);
         WorklogEntry worklog = new WorklogEntry(begin, end, "worklog 1");

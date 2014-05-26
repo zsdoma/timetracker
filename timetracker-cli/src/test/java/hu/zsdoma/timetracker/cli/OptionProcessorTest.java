@@ -127,7 +127,7 @@ public class OptionProcessorTest {
     }
 
     @Test
-    public final void testEnd() throws Exception {
+    public final void testEndWithDate() throws Exception {
         final String endDate = "2014.01.12. 13:13";
         String[] args = new String[] { "-e", "-endDate", endDate };
 
@@ -140,19 +140,48 @@ public class OptionProcessorTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Assert.assertNotNull(invocation);
                 Assert.assertNotNull(invocation.getArguments());
-                Assert.assertEquals(1, invocation.getArguments().length);
+                Assert.assertEquals(2, invocation.getArguments().length);
 
                 Date date = (Date) invocation.getArguments()[0];
                 Assert.assertEquals(DateUtils.dateFormatInstance().parse(endDate), date);
+                Assert.assertNull(invocation.getArguments()[1]);
                 return null;
             }
 
-        }).when(timeTrackerMock).end(Mockito.any(Date.class));
+        }).when(timeTrackerMock).end(Mockito.any(Date.class), Mockito.anyString());
 
         OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
         optionProcessor.process();
 
-        Mockito.verify(timeTrackerMock, Mockito.only()).end(Mockito.any(Date.class));
+        Mockito.verify(timeTrackerMock, Mockito.only()).end(Mockito.any(Date.class), Mockito.anyString());
+    }
+    
+    @Test
+    public final void testEnd() throws Exception {
+        String[] args = new String[] { "-e" };
+
+        CommandLine commandLine = commandLineParser.parse(options, args);
+
+        TimeTracker timeTrackerMock = Mockito.mock(TimeTracker.class);
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Assert.assertNotNull(invocation);
+                Assert.assertNotNull(invocation.getArguments());
+                Assert.assertEquals(2, invocation.getArguments().length);
+
+                Assert.assertNull(invocation.getArguments()[0]);
+                Assert.assertNull(invocation.getArguments()[1]);
+                return null;
+            }
+
+        }).when(timeTrackerMock).end(Mockito.any(Date.class), Mockito.anyString());
+
+        OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
+        optionProcessor.process();
+
+        Mockito.verify(timeTrackerMock, Mockito.only()).end(Mockito.any(Date.class), Mockito.anyString());
     }
 
     @Test
