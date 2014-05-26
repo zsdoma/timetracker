@@ -69,7 +69,8 @@ public class DefaultTimeTracker implements TimeTracker {
 
     /**
      * Add earlier worklog instance to current {@link TimeTrackerEntry}. If {@link DataSource} reference not null, then
-     * call {@link DataSource#save(TimeTrackerEntry)} method after the new entry is added.
+     * call {@link DataSource#save(TimeTrackerEntry)} method after the new entry is added. Must be earlier like the
+     * current date and must be set all fields.
      * 
      * @param worklog
      *            {@link WorklogEntry} reference.
@@ -229,7 +230,11 @@ public class DefaultTimeTracker implements TimeTracker {
     @Override
     public void removeById(final long worklogId) {
         WorklogEntry removedWorklog = worklogs.remove(worklogId);
-        LOGGER.info(MessageFormat.format("Worklog removed [{0}]", removedWorklog));
+        if (removedWorklog == null) {
+            LOGGER.warn(MessageFormat.format("Worklog not found by id.", removedWorklog));
+        } else {
+            LOGGER.info(MessageFormat.format("Worklog removed [{0}]", removedWorklog));
+        }
         saveCurrentState();
     }
 

@@ -8,44 +8,52 @@ import java.util.Date;
 public class WorklogEntry implements Comparable<WorklogEntry> {
 
     /**
-     * WorklogEntry ID.
+     * {@link WorklogEntry} id.
      */
     private long id;
 
     /**
-     * WorklogEntry begin timestamp.
+     * {@link WorklogEntry} begin timestamp.
      */
     private long beginTimestamp = -1;
 
     /**
-     * WorklogEntry end timestamp.
+     * {@link WorklogEntry} end timestamp.
      */
     private long endTimeStamp = -1;
 
     /**
-     * WorklogEntry message.
+     * {@link WorklogEntry} message.
      */
     private String message;
-    
+
     /**
-     * Constructor for setting all member variable.
+     * Constructor for set start, end and the message. The id is same as the begin timestamp.
      * 
-     * @param begin
+     * @param start
+     *            start of worklog timestamp.
      * @param end
+     *            end of worklog timestamp.
      * @param message
-     * @param issueId
+     *            Worklog message.
      */
-    // TODO builder patter
-    public WorklogEntry(final Date begin, final Date end, final String message) {
-        this(begin, message);
+    public WorklogEntry(final Date start, final Date end, final String message) {
+        this(start, message);
         this.endTimeStamp = end.getTime();
     }
 
-    // TODO builder patter
-    public WorklogEntry(Date begin, String message) {
+    /**
+     * Constructor for set begint and the message. The id is same as the begin timestamp.
+     * 
+     * @param start
+     *            start of worklog timestamp.
+     * @param message
+     *            end of worklog timestamp.
+     */
+    public WorklogEntry(Date start, String message) {
         super();
-        this.id = begin.getTime();
-        this.beginTimestamp = begin.getTime();
+        this.id = start.getTime();
+        this.beginTimestamp = start.getTime();
         this.message = message;
     }
 
@@ -76,18 +84,41 @@ public class WorklogEntry implements Comparable<WorklogEntry> {
         return id;
     }
 
+    /**
+     * Setter for message.
+     * 
+     * @param message
+     *            Message string.
+     */
     public void setMessage(String message) {
         this.message = message;
     }
 
+    /**
+     * Setter for worklog start date.
+     * 
+     * @param begin
+     *            Worklog start {@link Date}.
+     */
     public void setBegin(Date begin) {
         this.beginTimestamp = begin.getTime();
     }
 
+    /**
+     * Setter for worklog end date.
+     * 
+     * @param end
+     *            Worklog end {@link Date}.
+     */
     public void setEnd(Date end) {
         this.endTimeStamp = end.getTime();
     }
-    
+
+    /**
+     * Check whether the worklog is progress.
+     * 
+     * @return <code>true</code> if progress, <code>false</code> otherwise.
+     */
     public boolean isProgress() {
         return endTimeStamp == -1;
     }
@@ -100,7 +131,12 @@ public class WorklogEntry implements Comparable<WorklogEntry> {
     public String getMessage() {
         return message;
     }
-    
+
+    /**
+     * The hashCode method generated with Eclipse.
+     * 
+     * @return generted hash value.
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -112,6 +148,13 @@ public class WorklogEntry implements Comparable<WorklogEntry> {
         return result;
     }
 
+    /**
+     * The equals method generated with Eclipse.
+     * 
+     * @param obj
+     *            The anouther object.
+     * @return <code>true</code> if this object equals the another object.
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

@@ -17,8 +17,14 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main class for TimeTracker CLI.
+ */
 public class TimeTrackerMain {
 
+    /**
+     * TimeTracker database and settings folder in user home.
+     */
     private static final String TIMETRACKER_FOLDER = ".timetracker";
 
     /**
@@ -36,9 +42,14 @@ public class TimeTrackerMain {
      */
     private static CommandLineParser commandLineParser;
 
+    /**
+     * Main method.
+     * 
+     * @param args
+     *            command line args.
+     */
     public static void main(String[] args) {
-        String userHome = System.getProperty("user.home");
-        File xmlFile = getOrCreateXmlFile(userHome);
+        File xmlFile = getOrCreateXmlFile();
 
         commandLineParser = new GnuParser();
 
@@ -67,14 +78,21 @@ public class TimeTrackerMain {
         }
     }
 
-    private static File getOrCreateXmlFile(String userHome) {
-        File timetrackerFolder = new File(userHome + File.separator + TIMETRACKER_FOLDER);
+    /**
+     * Get XML database file (or create if not exists) from user.home/.timetracker folder.
+     * 
+     * @return {@link File} reference.
+     */
+    private static File getOrCreateXmlFile() {
+        String userHomeFolder = System.getProperty("user.home");
+        String xmlPath = userHomeFolder + File.separator + TIMETRACKER_FOLDER;
+        File timetrackerFolder = new File(xmlPath);
         if (!timetrackerFolder.exists()) {
             if (!timetrackerFolder.mkdir()) {
                 throw new TimeTrackerException("Can't create .timetracker folder in user home.");
             }
         }
-        return new File(userHome + File.separator + TIMETRACKER_FOLDER + File.separator + DATABASE_XML);
+        return new File(xmlPath + File.separator + DATABASE_XML);
     }
 
 }

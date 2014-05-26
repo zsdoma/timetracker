@@ -23,17 +23,38 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+/**
+ * The {@link DataSource} JAXB implementation.
+ */
 public class XmlDataSource implements DataSource {
+    /**
+     * ObjectFactory for create JAXB elements.
+     */
     private static final ObjectFactory objectFactory = new ObjectFactory();
 
+    /**
+     * The current timetracker database file.
+     */
     private File file;
 
+    /**
+     * Constuctor with database file reference.
+     * 
+     * @param file
+     *            {@link File} reference.
+     */
     public XmlDataSource(File file) {
         super();
         checkFile(file);
         this.file = file;
     }
 
+    /**
+     * Check whether file is exists and not a directory.
+     * 
+     * @param file
+     *            {@link File} reference.
+     */
     private void checkFile(File file) {
         Objects.requireNonNull(file);
         if (file.isDirectory()) {
@@ -41,6 +62,12 @@ public class XmlDataSource implements DataSource {
         }
     }
 
+    /**
+     * Save TimeTrackerEntry to a XML file.
+     * 
+     * @param database
+     *            {@link TimeTrackerEntry}
+     */
     @Override
     public void save(TimeTrackerEntry database) {
         TimeTracker timeTracker = buildTimeTracker(database);
@@ -56,6 +83,11 @@ public class XmlDataSource implements DataSource {
         }
     }
 
+    /**
+     * Open a file output stream by current file.
+     * 
+     * @return {@link FileOutputStream} reference.
+     */
     private FileOutputStream openStream() {
         FileOutputStream fileOutputStream;
         try {
@@ -66,12 +98,20 @@ public class XmlDataSource implements DataSource {
         return fileOutputStream;
     }
 
-    private TimeTracker buildTimeTracker(TimeTrackerEntry database) {
-        Map<Long, WorklogEntry> worklogEntries = database.getWorklogs();
+    /**
+     * Build TimeTracker JAXB element from TimeTrackerEntry instance.
+     * 
+     * @param timeTrackerEntry
+     *            {@link TimeTrackerEntry} reference.
+     * 
+     * @return {@link TimeTracker} reference.
+     */
+    private TimeTracker buildTimeTracker(TimeTrackerEntry timeTrackerEntry) {
+        Map<Long, WorklogEntry> worklogEntries = timeTrackerEntry.getWorklogs();
         ObjectFactory objectFactory = new ObjectFactory();
         TimeTracker timeTracker = objectFactory.createTimeTracker();
-        if (database.getCurrentWorklog() != null) {
-            timeTracker.setCurrentWorklog(convertEntryToWorklog(database.getCurrentWorklog()));
+        if (timeTrackerEntry.getCurrentWorklog() != null) {
+            timeTracker.setCurrentWorklog(convertEntryToWorklog(timeTrackerEntry.getCurrentWorklog()));
         }
         for (WorklogEntry worklogEntry : worklogEntries.values()) {
             Worklog worklog = convertEntryToWorklog(worklogEntry);
@@ -80,6 +120,13 @@ public class XmlDataSource implements DataSource {
         return timeTracker;
     }
 
+    /**
+     * Convert the given worklog entry to worklog JAXB element.
+     * 
+     * @param worklogEntry
+     *            {@link WorklogEntry} reference.
+     * @return {@link Worklog} reference.
+     */
     private Worklog convertEntryToWorklog(WorklogEntry worklogEntry) {
         Worklog worklog = objectFactory.createWorklog();
         worklog.setId(worklogEntry.getId());
@@ -89,6 +136,11 @@ public class XmlDataSource implements DataSource {
         return worklog;
     }
 
+    /**
+     * Load a timetracker database from current xml file.
+     * 
+     * @return {@link TimeTrackerEntry} reference.
+     */
     @Override
     public TimeTrackerEntry load() {
         TimeTrackerEntry database;
@@ -112,6 +164,13 @@ public class XmlDataSource implements DataSource {
         return database;
     }
 
+    /**
+     * Parse worklog JAXB element list to worlog entry map.
+     * 
+     * @param worklogs
+     *            List of {@link Worklog} reference.
+     * @return Map of {@link WorklogEntry} by Worklog id.
+     */
     private Map<Long, WorklogEntry> parseTimeTrackerElement(List<Worklog> worklogs) {
         Map<Long, WorklogEntry> worklogEntries = new HashMap<Long, WorklogEntry>();
         for (Worklog worklog : worklogs) {
@@ -121,6 +180,13 @@ public class XmlDataSource implements DataSource {
         return worklogEntries;
     }
 
+    /**
+     * Convert a worklog JAXB element to worklog entry.
+     * 
+     * @param worklog
+     *            {@link Worklog} reference.
+     * @return {@link WorklogEntry} reference.
+     */
     private WorklogEntry convertWorklogToEntry(Worklog worklog) {
         WorklogEntry worklogEntry = null;
         long begin = worklog.getBeginTime();
@@ -130,6 +196,13 @@ public class XmlDataSource implements DataSource {
         return worklogEntry;
     }
 
+    /**
+     * Load a {@link TimeTracker} JAXB element from current file.
+     * 
+     * @return {@link TimeTracker} reference.
+     * @throws JAXBException
+     *             throw this if the JAXB unmarshalling failed.
+     */
     private TimeTracker loadTimeTracker() throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(TimeTracker.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -141,6 +214,11 @@ public class XmlDataSource implements DataSource {
         }
     }
 
+    /**
+     * Open file input stream by current file.
+     * 
+     * @return {@link FileOutputStream} referece.
+     */
     private FileInputStream openInputStream() {
         FileInputStream fileInputStream;
         try {

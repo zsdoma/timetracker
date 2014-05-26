@@ -11,26 +11,67 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
+/**
+ * Process command line options and call the applicable timetracker function.
+ */
 public class OptionProcessor {
+    /**
+     * Id option string.
+     */
     public static final String OPTION_ID = "id";
+
+    /**
+     * Date option string for list worklogs option.
+     */
     public static final String OPTION_DATE = "date";
+
+    /**
+     * Message option string.
+     */
     public static final String OPTION_MESSAGE = "message";
+
+    /**
+     * End date option string.
+     */
     public static final String OPTION_END_DATE = "endDate";
+
+    /**
+     * Start date option string.
+     */
     public static final String OPTION_START_DATE = "startDate";
 
+    /**
+     * Parsed {@link CommandLine} reference.
+     */
     private CommandLine commandLine;
+
+    /**
+     * {@link TimeTracker} reference.
+     */
     private TimeTracker timeTracker;
 
+    /**
+     * Constuctor with {@link CommandLine} and {@link TimeTracker} reference.
+     * 
+     * @param commandLine
+     *            CommandLine that contain the given command line options.
+     * @param timeTracker
+     *            {@link TimeTracker} reference.
+     */
     public OptionProcessor(CommandLine commandLine, TimeTracker timeTracker) {
         this.commandLine = commandLine;
         this.timeTracker = timeTracker;
     }
 
+    /**
+     * Process the given command line.
+     */
     public void process() {
         try {
             if (commandLine.hasOption('s')) {
@@ -56,6 +97,12 @@ public class OptionProcessor {
         }
     }
 
+    /**
+     * List case implementation.
+     * 
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private void processListCase() throws ParseException {
         Date date = processDate();
         List<WorklogEntry> worklogs = Collections.emptyList();
@@ -69,6 +116,12 @@ public class OptionProcessor {
         }
     }
 
+    /**
+     * Write formatted worklog list to standard output.
+     * 
+     * @param worklogs
+     *            List of {@link WorklogEntry}.
+     */
     private void showWorklogs(List<WorklogEntry> worklogs) {
         String leftAlignFormat = "| %-13d | %-17s | %-17s | %-25s |%n";
 
@@ -83,6 +136,13 @@ public class OptionProcessor {
         System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
     }
 
+    /**
+     * Parse date option from {@link CommandLine}.
+     * 
+     * @return value of date option in {@link Date} representation.
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private Date processDate() throws ParseException {
         Date date = null;
         if (commandLine.hasOption(OPTION_DATE)) {
@@ -91,6 +151,12 @@ public class OptionProcessor {
         return date;
     }
 
+    /**
+     * Process the update case.
+     * 
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private void processUpdateCase() throws ParseException {
         if (commandLine.hasOption(OPTION_ID)) {
             Date startDate = processStartDate(false);
@@ -104,10 +170,22 @@ public class OptionProcessor {
         }
     }
 
+    /**
+     * Throw a {@link MissingOptionException} with the given message.
+     * 
+     * @param missingOptionMessage
+     *            Exception message.
+     */
     private void throwMissingOptionException(String missingOptionMessage) {
         throw new RuntimeException(new MissingArgumentException(missingOptionMessage));
     }
 
+    /**
+     * Add earlier case implementation.
+     * 
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private void processAddEarlierCase() throws ParseException {
         if (hasOptionsForAddEarlier()) {
             String message = processMessage();
@@ -120,20 +198,35 @@ public class OptionProcessor {
         }
     }
 
+    /**
+     * Check whether all required option is exists.
+     * 
+     * @return <code>true</code> if all option exists, <code>false</code> otherwise.
+     */
     private boolean hasOptionsForAddEarlier() {
         return commandLine.hasOption(OPTION_START_DATE) && commandLine.hasOption(OPTION_END_DATE)
                 && commandLine.hasOption(OPTION_MESSAGE);
     }
 
+    /**
+     * Remove worklog case implementation.
+     */
     private void processRemmoveCase() {
         if (commandLine.hasOption(OPTION_ID)) {
-            Long id = processId(true);
+            Long id = processId();
+            if (id == null) {
+                throwMissingOptionException("The id option is required.");
+            }
             timeTracker.removeById(id);
         }
     }
 
-    // FIXME require
-    private Long processId(boolean require) {
+    /**
+     * Process id param from {@link CommandLine}.
+     * 
+     * @return Parsed process id or null.
+     */
+    private Long processId() {
         Long id = null;
         try {
             id = Long.parseLong(commandLine.getOptionValue(OPTION_ID));
@@ -143,10 +236,26 @@ public class OptionProcessor {
         return id;
     }
 
+    /**
+     * End worklog case implementation.
+     * 
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private void processEndCase() throws ParseException {
         timeTracker.end(processEndDate(false), processMessage());
     }
 
+    /**
+     * Process end date from {@link CommandLine}.
+     * 
+     * @param require
+     *            if <code>true</code> then endDate option is required. If <code>true</code> and missing then throw
+     *            {@link MissingOptionException}.
+     * @return value of endDate option or null.
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private Date processEndDate(boolean require) throws ParseException {
         Date endDate = null;
         if (commandLine.hasOption(OPTION_END_DATE)) {
@@ -158,6 +267,12 @@ public class OptionProcessor {
         return endDate;
     }
 
+    /**
+     * Start case implementation.
+     * 
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private void processStartCase() throws ParseException {
         if (commandLine.hasOption(OPTION_MESSAGE)) {
             String message = processMessage();
@@ -172,11 +287,25 @@ public class OptionProcessor {
         }
     }
 
+    /**
+     * Process message from {@link CommandLine}.
+     * 
+     * @return Value of message option or null.
+     */
     private String processMessage() {
         String message = commandLine.getOptionValue(OPTION_MESSAGE);
         return message;
     }
 
+    /**
+     * Process start date option from {@link CommandLine}.
+     * 
+     * @param required
+     *            If <code>true</code> then required option and throw {@link MissingOptionException} when missing.
+     * @return value of start date option in {@link Date} representation.
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
     private Date processStartDate(boolean required) throws ParseException {
         Date startDate = null;
         if (commandLine.hasOption(OPTION_START_DATE)) {
@@ -188,21 +317,27 @@ public class OptionProcessor {
         return startDate;
     }
 
-    private Date parseDate(String startTimeString) throws ParseException {
+    /**
+     * Parse date string to {@link Date} instance. Use {@link DateUtils#DATE_FORMAT} pattern.
+     * 
+     * @param dateString
+     *            date string.
+     * @return {@link Date} instance or null.
+     * @throws ParseException
+     *             throw this when the date format wrong.
+     */
+    private Date parseDate(String dateString) throws ParseException {
         Date startTime = null;
-        if (startTimeString != null) {
-            startTime = DateUtils.dateFormatInstance().parse(startTimeString);
+        if (dateString != null) {
+            startTime = DateUtils.dateFormatInstance().parse(dateString);
         }
         return startTime;
     }
 
-    /*
-     * start: [startDate], [startTime], message end: [startDate], [startTime], [endDate] ,[endTime], [message]
+    /**
+     * Build {@link Options} instance for command line configuration.
      * 
-     * list: [date], [startDate, endDate], [startTime, endTime], [id] update: id, [startDate], [startTime], [endDate],
-     * [endTime], [message] remove: id
-     * 
-     * addEarlier: [startDate], [startTime], [endDate], [endTime], [message]
+     * @return {@link Options} instance.
      */
     @SuppressWarnings("static-access")
     public static Options buildOptions() {

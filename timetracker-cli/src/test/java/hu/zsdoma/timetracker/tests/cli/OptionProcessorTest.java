@@ -1,7 +1,8 @@
-package hu.zsdoma.timetracker.cli;
+package hu.zsdoma.timetracker.tests.cli;
 
 import hu.zsdoma.timetracker.api.TimeTracker;
 import hu.zsdoma.timetracker.api.dto.WorklogEntry;
+import hu.zsdoma.timetracker.cli.OptionProcessor;
 import hu.zsdoma.timetracker.utils.DateUtils;
 
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Date;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,17 +21,25 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+/**
+ * Tests for {@link OptionProcessor} class.
+ */
 public class OptionProcessorTest {
 
+    /**
+     * {@link CommandLineParser} instance.
+     */
     private static CommandLineParser commandLineParser;
+    /**
+     * {@link Option} instance.
+     */
     private static Options options;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-    }
-
+    /**
+     * Init options and command line parser before all tests.
+     */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         options = OptionProcessor.buildOptions();
         commandLineParser = new GnuParser();
     }
@@ -155,7 +165,7 @@ public class OptionProcessorTest {
 
         Mockito.verify(timeTrackerMock, Mockito.only()).end(Mockito.any(Date.class), Mockito.anyString());
     }
-    
+
     @Test
     public final void testEnd() throws Exception {
         String[] args = new String[] { "-e" };
@@ -251,7 +261,8 @@ public class OptionProcessorTest {
         final String startString = "2014.01.12. 13:13";
         final String endString = "2014.01.12. 13:23";
         String message = "hello";
-        String[] args = new String[] { "--update", "-id", "1000", "-startDate", startString, "-endDate", endString, "-message", message };
+        String[] args = new String[] { "--update", "-id", "1000", "-startDate", startString, "-endDate", endString,
+                "-message", message };
 
         final WorklogEntry expectedWorklogEntry = new WorklogEntry(DateUtils.dateFormatInstance().parse(startString),
                 DateUtils.dateFormatInstance().parse(endString), message);
