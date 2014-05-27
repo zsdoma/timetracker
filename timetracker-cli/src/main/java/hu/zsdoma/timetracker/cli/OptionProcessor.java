@@ -146,16 +146,16 @@ public class OptionProcessor {
     /**
      * Write formatted current worklog entry to standard output.
      * 
-     * @param worklogs
+     * @param currentWorklog
      *            Current {@link WorklogEntry}.
      */
-    private void showCurrentWorklog(WorklogEntry worklogEntry) {
+    private void showCurrentWorklog(WorklogEntry currentWorklog) {
         String leftAlignFormat = "| %-13d | %-17s | %-25s |%n";
         System.out.format("+---------------+-------------------+---------------------------+%n");
         System.out.printf("| Id            | Start Date        | Message                   |%n");
         System.out.format("+---------------+-------------------+---------------------------+%n");
-        String start = DateUtils.dateTimeFormatInstance().format(new Date(worklogEntry.getBeginTimestamp()));
-        System.out.format(leftAlignFormat, worklogEntry.getId(), start, worklogEntry.getMessage());
+        String start = DateUtils.dateTimeFormatInstance().format(new Date(currentWorklog.getBeginTimestamp()));
+        System.out.format(leftAlignFormat, currentWorklog.getId(), start, currentWorklog.getMessage());
         System.out.format("+---------------+-------------------+---------------------------+%n");
     }
 
