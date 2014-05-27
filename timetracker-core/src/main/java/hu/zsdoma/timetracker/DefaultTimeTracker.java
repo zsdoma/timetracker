@@ -219,7 +219,7 @@ public class DefaultTimeTracker implements TimeTracker {
      * 
      * @param timestamp
      *            The day in timestamp.
-     * @return List of {@link WorklogEntry} by the given date.
+     * @return List of {@link WorklogEntry} by the given date or empty list.
      */
     @Override
     public List<WorklogEntry> listByDay(final long timestamp) {

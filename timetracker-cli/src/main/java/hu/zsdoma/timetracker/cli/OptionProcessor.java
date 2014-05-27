@@ -107,7 +107,11 @@ public class OptionProcessor {
         List<WorklogEntry> worklogs = Collections.emptyList();
         WorklogEntry currentWorklogEntry = null;
         if (date != null) {
-            worklogs = timeTracker.listByDay(date.getTime());
+            if (date.getTime() == 0) {
+                worklogs = timeTracker.listAll();
+            } else {
+                worklogs = timeTracker.listByDay(date.getTime());
+            }
         } else {
             worklogs = timeTracker.list();
             currentWorklogEntry = timeTracker.current();
@@ -159,7 +163,12 @@ public class OptionProcessor {
     private Date processDate() throws ParseException {
         Date date = null;
         if (commandLine.hasOption(OPTION_DATE)) {
-            date = parseDate(commandLine.getOptionValue(OPTION_DATE));
+            String dateOptionValue = commandLine.getOptionValue(OPTION_DATE);
+            if ("*".equals(dateOptionValue)) {
+                date = new Date(0);
+            } else {
+                date = parseDate(dateOptionValue);
+            }
         }
         return date;
     }
@@ -390,6 +399,7 @@ public class OptionProcessor {
         Option start = new Option("s", "start", false, "Start worklog now. (-startDate and message optional).");
         Option end = new Option("e", "end", false, "End worklog now. (-endDate and -message optional)");
         Option list = new Option("l", "list", false, "List worklogs by given day (-date). Default the current day.");
+        Option listAll = new Option("la", "listAll", false, "List all worklogs.");
         Option update = new Option("u", "update", false, "Update worklog by id. (-id required)");
         Option remove = new Option("r", "remove", false, "Remove worklog by id. (-id required)");
         Option addEarlier = new Option("a", "add-earlier", false, "Add earlier worklog.");
@@ -401,6 +411,7 @@ public class OptionProcessor {
         commands.addOption(update);
         commands.addOption(remove);
         commands.addOption(addEarlier);
+        commands.addOption(listAll);
 
         Options options = new Options();
         options.addOptionGroup(commands);

@@ -73,7 +73,7 @@ public class OptionProcessorTest {
     }
 
     @Test
-    public void testStartStartDate() throws Exception {
+    public void testStartWithStartDateAndMessage() throws Exception {
         final String startDate = "2014.01.12. 13:13";
         String[] args = new String[] { "-s", "-message", "hello", "-startDate", startDate };
 
@@ -289,6 +289,88 @@ public class OptionProcessorTest {
         optionProcessor.process();
 
         Mockito.verify(timeTrackerMock, Mockito.only()).update(Mockito.any(WorklogEntry.class));
+    }
+    
+    @Test
+    public final void testList() throws Exception {
+        String[] args = new String[] { "--list" };
+
+        CommandLine commandLine = commandLineParser.parse(options, args);
+
+        TimeTracker timeTrackerMock = Mockito.mock(TimeTracker.class);
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Assert.assertNotNull(invocation);
+                Assert.assertNotNull(invocation.getArguments());
+                Assert.assertEquals(0, invocation.getArguments().length);
+                return null;
+            }
+
+        }).when(timeTrackerMock).list();
+
+        OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
+        optionProcessor.process();
+
+        Mockito.verify(timeTrackerMock, Mockito.atMost(1)).current();
+        Mockito.verify(timeTrackerMock, Mockito.atMost(1)).list();
+    }
+    
+    @Test
+    public final void testListByDate() throws Exception {
+        final String dateString = "2014.01.12.";
+        String[] args = new String[] { "--list", "-date", dateString};
+
+        CommandLine commandLine = commandLineParser.parse(options, args);
+
+        TimeTracker timeTrackerMock = Mockito.mock(TimeTracker.class);
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Assert.assertNotNull(invocation);
+                Assert.assertNotNull(invocation.getArguments());
+                Assert.assertEquals(1, invocation.getArguments().length);
+                
+                Long expectedDate = DateUtils.normalizeDate(DateUtils.dateFormatInstance().parse(dateString)).getTime();
+                Long actual = (Long) invocation.getArguments()[0];
+                Assert.assertEquals(expectedDate, actual);
+                return null;
+            }
+
+        }).when(timeTrackerMock).listByDay(Mockito.anyLong());
+
+        OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
+        optionProcessor.process();
+
+        Mockito.verify(timeTrackerMock, Mockito.only()).listByDay(Mockito.anyLong());
+    }
+    
+    @Test
+    public final void testListAll() throws Exception {
+        final String dateString = "*";
+        String[] args = new String[] { "--list", "-date", dateString};
+
+        CommandLine commandLine = commandLineParser.parse(options, args);
+
+        TimeTracker timeTrackerMock = Mockito.mock(TimeTracker.class);
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Assert.assertNotNull(invocation);
+                Assert.assertNotNull(invocation.getArguments());
+                Assert.assertEquals(0, invocation.getArguments().length);
+                return null;
+            }
+
+        }).when(timeTrackerMock).listAll();
+
+        OptionProcessor optionProcessor = new OptionProcessor(commandLine, timeTrackerMock);
+        optionProcessor.process();
+
+        Mockito.verify(timeTrackerMock, Mockito.only()).listAll();
     }
 
 }

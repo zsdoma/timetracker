@@ -13,7 +13,7 @@ public interface TimeTracker {
     /**
      * List worklogs by current day.
      * 
-     * @return List of {@link WorklogEntry} by current date.
+     * @return List of {@link WorklogEntry} by current date or empty list.
      */
     List<WorklogEntry> list();
 
@@ -22,14 +22,14 @@ public interface TimeTracker {
      * 
      * @param timestamp
      *            The given day in timestamp.
-     * @return List of {@link WorklogEntry} by given day.
+     * @return List of {@link WorklogEntry} by the given date or empty list.
      */
     List<WorklogEntry> listByDay(long timestamp);
 
     /**
      * List all stored worklogs.
      * 
-     * @return List of all {@link WorklogEntry}.
+     * @return List of all {@link WorklogEntry} or empty list.
      */
     List<WorklogEntry> listAll();
 
