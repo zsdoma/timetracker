@@ -64,6 +64,45 @@ public class DefaultTimeTrackerTest {
     }
 
     /**
+     * Test for list by day method.
+     * 
+     * @throws Exception
+     *             exception that occurred during the test.
+     */
+    @Test
+    public void testList() throws Exception {
+        DateFormat dateFormat = DateUtils.dateTimeFormatInstance();
+        Date begin = dateFormat.parse("2010.01.12. 03:30:00");
+        Date end = dateFormat.parse("2010.01.12. 03:40:00");
+        WorklogEntry worklog = new WorklogEntry(begin, end, "worklog 1");
+        timeTracker.addEarlier(worklog);
+
+        dateFormat = DateUtils.dateTimeFormatInstance();
+        begin = dateFormat.parse("2010.01.11. 03:30:00");
+        end = dateFormat.parse("2010.01.11. 03:40:00");
+        worklog = new WorklogEntry(begin, end, "worklog 2");
+        timeTracker.addEarlier(worklog);
+
+        dateFormat = DateUtils.dateTimeFormatInstance();
+        begin = dateFormat.parse("2010.01.12. 20:30:00");
+        end = dateFormat.parse("2010.01.13. 00:40:00");
+        worklog = new WorklogEntry(begin, end, "worklog 3");
+        timeTracker.addEarlier(worklog);
+
+        List<WorklogEntry> list = timeTracker.listByDay(DateUtils.dateFormatInstance().parse("2010.01.12.").getTime());
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals("worklog 1", list.get(0).getMessage());
+        Assert.assertEquals("worklog 3", list.get(1).getMessage());
+
+        list = timeTracker.listByDay(DateUtils.dateFormatInstance().parse("2010.01.11.").getTime());
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals("worklog 2", list.get(0).getMessage());
+
+        list = timeTracker.listByDay(DateUtils.dateFormatInstance().parse("2010.01.13.").getTime());
+        Assert.assertEquals(0, list.size());
+    }
+
+    /**
      * Tests for add earlier method.
      * 
      * @throws Exception
@@ -139,9 +178,11 @@ public class DefaultTimeTrackerTest {
         String testMessage = "new worklog message";
         worklog.setMessage(testMessage);
         timeTracker.update(worklog);
-
+        
         list = timeTracker.listAll();
         Assert.assertEquals(list.get(0).getMessage(), testMessage);
+        
+//        timeTracker.update(new Worklo)
     }
 
     /**

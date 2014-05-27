@@ -143,6 +143,12 @@ public class OptionProcessor {
         System.out.format("+---------------+-------------------+-------------------+---------------------------+%n");
     }
 
+    /**
+     * Write formatted current worklog entry to standard output.
+     * 
+     * @param worklogs
+     *            Current {@link WorklogEntry}.
+     */
     private void showCurrentWorklog(WorklogEntry worklogEntry) {
         String leftAlignFormat = "| %-13d | %-17s | %-25s |%n";
         System.out.format("+---------------+-------------------+---------------------------+%n");
